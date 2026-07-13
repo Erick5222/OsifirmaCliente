@@ -38,31 +38,38 @@ jobs:
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: Dependencia firmaOsinergmin
+    - name: Instalar firmaOsinergmin en repositorio local
       run: |
-        echo "::warning::La dependencia pe.gob.osinergmin:firmaOsinergmin:1.0 no esta en Maven Central."
-        echo "El build fallara hasta publicarla en GitHub Packages o agregar install-file en CI."
-        echo "Ver docs/INSTALADOR-MACOS.md seccion Dependencias."
+        mvn install:install-file \
+          -Dfile=libs/firmaOsinergmin-1.0.jar \
+          -DgroupId=pe.gob.osinergmin \
+          -DartifactId=firmaOsinergmin \
+          -Dversion=1.0 \
+          -Dpackaging=jar \
+          -DpomFile=libs/firmaOsinergmin-1.0.pom
 
     - name: Construir empaquetado macOS
       id: build
       continue-on-error: true
       run: |
         chmod +x installer/build-installer-macos.sh
-        ./installer/build-installer-macos.sh ${{ github.event.inputs.package_type || 'app-image' }}
+        ./installer/build-installer-macos.sh ${{ github.event.inputs.package_type || 'app-image' }} 2>&1 | tee target/macos-build.log
 
     - name: Registrar resultado del build
       if: always()
       run: |
         if [ "${{ steps.build.outcome }}" = "success" ]; then
           echo "BUILD_STATUS=ok" >> $GITHUB_ENV
+          echo "Build macOS completado."
         else
           echo "BUILD_STATUS=failed" >> $GITHUB_ENV
-          echo "::warning::Build macOS fallo (esperado en fase 1 si falta firmaOsinergmin o signing). Revisar logs."
+          echo "::warning::Build macOS fallo. Revisar artifact macOS-build-log y docs/INSTALADOR-MACOS.md"
         fi
         DIST="target/installer/dist"
         if [ -d "$DIST" ]; then
-          find "$DIST" -maxdepth 2 -type f -o -type d | head -20
+          find "$DIST" -maxdepth 3 | head -30
+        else
+          echo "No se genero target/installer/dist"
         fi
 
     - name: Subir artefacto macOS
@@ -74,11 +81,11 @@ jobs:
           target/installer/dist/**
         if-no-files-found: warn
 
-    - name: Subir log de build si fallo
-      if: steps.build.outcome == 'failure'
+    - name: Subir log de build
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: macOS-build-log-${{ env.APP_VERSION }}
         path: |
-          target/surefire-reports/**
+          target/macos-build.log
         if-no-files-found: ignore

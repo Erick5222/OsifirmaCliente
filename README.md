@@ -4,11 +4,10 @@ Cliente de escritorio para firma digital (PAdES, XAdES, CAdES) del ecosistema Os
 
 Repositorio: https://github.com/Erick5222/OsifirmaCliente
 
-## Requisitos de desarrollo
+## Dependencias
 
-- JDK 21
-- Maven 3.6+
-- `firmaOsinergmin:1.0` en repositorio Maven local
+- JDK 21, Maven 3.6+
+- `firmaOsinergmin` en `libs/` — instalar con `mvn install:install-file` (ver `libs/README.md`)
 
 ## Ejecutar en desarrollo
 

@@ -72,22 +72,15 @@ Valor actual: **1.0.3**
 
 Incrementar solo esa propiedad antes de cada release del instalador.
 
-## Dependencias pendientes en CI
+## Dependencias en CI
 
-### firmaOsinergmin
+La libreria `firmaOsinergmin-1.0.jar` se incluye en `libs/` e instala automaticamente
+en GitHub Actions antes del build (`mvn install:install-file`).
 
-```
-pe.gob.osinergmin:firmaOsinergmin:1.0
-```
+**Advertencia:** el repositorio es publico. Si la libreria es confidencial, hacer el
+repo privado o migrar a GitHub Packages.
 
-No esta en Maven Central. El pipeline de GitHub Actions **fallara en `mvn package`**
-hasta resolver una de estas opciones:
-
-1. Publicar el JAR en GitHub Packages
-2. Agregar paso `mvn install:install-file` con JAR desde secret/repo
-3. Configurar repositorio Maven privado (Nexus)
-
-### Code signing Apple
+## Dependencias pendientes (fase 2)
 
 Para distribucion fuera del equipo de desarrollo se requiere:
 
@@ -109,8 +102,8 @@ No implementado en fase 1.
 
 ## Proximos pasos
 
-1. Resolver `firmaOsinergmin` en GitHub Actions
-2. Validar `app-image` en Mac real o runner
-3. Agregar `Info.plist` para protocolo `osinergmin-firmador://`
+1. Ejecutar workflow y revisar logs del primer build con firmaOsinergmin
+2. Validar `.app` en Mac real o runner
+3. Agregar Info.plist para protocolo URL en macOS
 4. Implementar acceso a certificados via Keychain
 5. Habilitar DMG firmado y notarizado para distribucion

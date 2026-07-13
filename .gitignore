@@ -13,6 +13,7 @@ logs/
 
 # JARs compilados (el artefacto se genera en target/)
 *.jar
+!libs/firmaOsinergmin-1.0.jar
 
 # IDE
 .idea/
