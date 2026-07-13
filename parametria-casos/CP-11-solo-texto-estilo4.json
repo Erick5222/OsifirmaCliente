@@ -1,0 +1,16 @@
+{
+  "invocacion": {
+    "idSolicitud": "CP-11-TEXTO",
+    "origenDocumento": "local",
+    "rutaLocal": "documento_prueba.pdf",
+    "FirmaArrastrar": false
+  },
+  "param": {
+    "signatureStyle": 4,
+    "applyImage": false,
+    "stampTextSize": 11,
+    "SignatureTextTemplate": "Firmado digitalmente por el titular",
+    "positioningMode": "ID",
+    "signatureReason": "Firma solo texto — CP-11"
+  }
+}

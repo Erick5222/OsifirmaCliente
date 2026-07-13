@@ -1,0 +1,18 @@
+================================================================================
+Estructura — firma-desktop-client
+================================================================================
+Módulo: com.osinergmin.firma.desktop
+
+  com.osinergmin.firma.desktop.App
+  integration/ClientConfiguration
+  ui/UiTheme
+  ui/login/         — LoginWindow, validación post-login
+  ui/main/          — MainWorkspace escritorio + proceso de firma (demo)
+
+Recursos: com/osinergmin/firma/desktop/{fxml,css,config,images}
+
+Flujo: Login → validación servicios → MainWorkspace (escena reemplazada en el mismo Stage).
+
+Instalador (opcional, no altera desarrollo): installer/INSTALADOR.md, mvn -Pinstaller package
+
+================================================================================

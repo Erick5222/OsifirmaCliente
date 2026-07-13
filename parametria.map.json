@@ -1,0 +1,52 @@
+// Referencia de parametria.json — incluye comentarios (JSONC). No cargar directamente en la app; copiar a parametria.json sin comentarios.
+{
+  "invocacion": {
+    "idSolicitud": "SOL-2026-001", // ID de la operacion; se envia en el callback al terminar
+    "token": "${JWT_TOKEN}", // JWT Keycloak (Bearer). Obligatorio para alfresco y url
+    "refresh_token": "${REFRESH_TOKEN}", // JWT refresh Keycloak para renovar sesion
+    "callbackUrl": "http://localhost:8080/firma-digital/api/firma/callback", // POST JSON al finalizar; incluye signedContentBase64
+    "webOrigen": "", // Reservado portal web; no usado aun en desktop
+    "origenDocumento": "local", // Origen del PDF: local | alfresco | url | bytes
+    "rutaLocal": "documento_prueba.pdf", // Ruta PDF en disco (origen local), relativa a la raiz del proyecto
+    "documentoUrl": "", // URL HTTP(S) del PDF (origen url)
+    "nodeIdAlfresco": "${NODE_ID_ALFRESCO}", // UUID del nodo documento Alfresco (origen y destino con versionado)
+    "idDocumentoAlfresco": "${NODE_ID_ALFRESCO}", // Alias de nodeIdAlfresco; mismo proposito
+    "documentVersion": 3, // Version a consultar (GET). Default 1 si se omite con origen alfresco
+    "usarAlfresco": false, // true activa flujo Alfresco (redundante si origenDocumento=alfresco)
+    "contentType": "application/pdf", // Tipo MIME del documento
+    "sinVisor": false, // true omite el visor PDF
+    "sinBandeja": true, // true omite bandeja de documentos (default true si se omite)
+    "abrirVisorPrimero": false, // Reservado flujo bandeja
+    "modo": "completo", // completo | soloFirma (soloFirma tambien omite visor)
+    "FirmaArrastrar": true, // true permite arrastrar sello en visor; false usa posicion de param
+    "cerrarAlTerminar": false, // true cierra la aplicacion automaticamente tras firma exitosa
+    "interfazMinima": false // true: UI compacta en firma (sin stepper/log) y cierra al terminar; certificado lo elige el usuario
+  },
+  "param": {
+    "signatureFormat": 1, // 1=PAdES, 2=XAdES (.xml), 3=CAdES (.p7s); formatos 2/3 omiten visor PDF
+    "originPath": "", // Ruta local alternativa o complemento a rutaLocal
+    "destinationPath": "", // UUID carpeta Alfresco destino (POST /children). Obligatorio para subir firmado
+    "fileName": "documento.pdf", // Nombre exacto al subir a Alfresco (prioridad sobre [F].ext en sesion). Vacio: usa nombre firmado en memoria
+    "signatureStyle": 1, // 0=invisible, 1=logo+texto horizontal, 2=logo+texto abajo, 3=solo logo, 4=solo texto
+    "applyImage": true, // true incluye imagen de sello; false solo texto o invisible
+    "stampTextSize": 13, // Tamanio del texto del sello (minimo 7)
+    "stampWordWrap": 37, // Ancho de ajuste de texto (leido; pendiente en motor)
+    "SignatureTextTemplate": "", // Texto libre del sello (infoContacto del motor)
+    "positioningMode": "", // Preset: SD, SI, SM, MD, MI, MM, ID, II, IM. TA = firma por texto (requiere signatureTagName)
+    "signatureTagName": "", // Texto ancla en el PDF (ej. GYAURI). Busca GYAURI, «GYAURI» o «GYAURI». Requiere FirmaArrastrar=false
+    "stampPage": 1, // Numero de pagina del sello (desde 1)
+    "positionx": 10, // Coordenada X en puntos PDF
+    "positiony": 400, // Coordenada Y en puntos PDF (desde borde superior)
+    "signatureLevel": "B", // Nivel: B | T | LTA (basico, con timestamp, archivo largo plazo)
+    "webTsa": "", // URL del servidor TSA (requerido si nivel T o LTA)
+    "userTsa": "", // Usuario del servicio TSA
+    "passwordTsa": "", // Clave del servicio TSA
+    "signatureReason": "Firma digital OSINERGMIN" // Motivo de la firma
+  },
+  "credential": "", // Alias del certificado en Windows-MY; vacio = usuario elige en pantalla
+  "document": "${DOCUMENT_BASE64}", // PDF en Base64 (origen bytes). Placeholder o data:application/pdf;base64,...
+  "stamp": "" // PNG del sello en Base64; vacio y applyImage=true usa signing.image.path
+}
+// Panel Administracion (menu lateral, roles JWT en client.properties admin.jwt.roles):
+// Prioridad efectiva: parametria.json (param.*) > ~/.osinergmin-firma/signing-admin.properties > client.properties
+// TSL/verificar TSL y TSA por defecto se editan en el panel; signatureLevel en param gana si esta definido en JSON

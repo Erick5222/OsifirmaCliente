@@ -1,0 +1,49 @@
+# Maven / build
+target/
+dist/
+
+# Logs
+*.log
+logs/
+
+# Instaladores generados
+*.msi
+*.dmg
+*.pkg
+
+# JARs compilados (el artefacto se genera en target/)
+*.jar
+
+# IDE
+.idea/
+.vscode/
+.gk/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (plantilla heredada)
+node_modules/
+
+# Tests
+TEST*.xml
+
+# Binarios
+*.exe
+*.war
+*.app
+*.rar
+*.class
+
+# Artefactos locales de instalador
+instaladorMSI/
+pe/
+
+# Media grande
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv

@@ -1,0 +1,22 @@
+{
+  "invocacion": {
+    "token": "${JWT_TOKEN}",
+    "idSolicitud": "CP-16-LOCAL-WIN",
+    "callbackUrl": "http://localhost:8080/firma-digital/api/firma/callback",
+    "origenDocumento": "local",
+    "rutaLocal": "C:/ruta/ejemplo/mi_documento.pdf",
+    "FirmaArrastrar": true,
+    "cerrarAlTerminar": false
+  },
+  "param": {
+    "signatureFormat": 1,
+    "originPath": "C:/ruta/ejemplo/mi_documento.pdf",
+    "destinationPath": "C:/ruta/ejemplo/salida/mi_documento[F].pdf",
+    "fileName": "mi_documento_firmado.pdf",
+    "positioningMode": "SD",
+    "positionx": 10,
+    "positiony": 400,
+    "signatureStyle": 1,
+    "applyImage": true
+  }
+}

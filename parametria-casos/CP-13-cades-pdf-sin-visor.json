@@ -1,0 +1,22 @@
+
+{
+  "invocacion": {
+    "idSolicitud": "CP-13-CADES-ALF",
+    "token": "${JWT_TOKEN}",
+    "origenDocumento": "alfresco",
+    "nodeIdAlfresco": "912e2eab-2131-44f3-ae2e-ab2131c4f3bc",
+    "documentVersion": 1,
+    "contentType": "image/jpeg",
+    "sinVisor": true,
+    "modo": "soloFirma",
+    "FirmaArrastrar": false
+  },
+  "param": {
+    "signatureFormat": 3,
+    "signatureLevel": "B",
+    "fileName": "pruebas2Firmado.p7s",
+    "applyImage": false,
+    "signatureReason": "Prueba CAdES Alfresco — CP-13",
+    "destinationPath": "12bc7696-1764-4b99-9aa7-63077d4399d5"
+  }
+}

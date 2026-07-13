@@ -1,0 +1,6 @@
+# Pegue aqui el PDF en Base64 (una sola linea, sin saltos).
+# Renombre este archivo a document.base64 para CP-07 y casos con origen bytes.
+#
+# Alternativas sin archivo:
+#   set FIRMA_DOCUMENT_BASE64=<base64>
+#   java -Dfirma.document.base64=<base64> ...

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.osinergmin.firma.desktop.ui.login.LoginController"
+           prefWidth="1040" prefHeight="700">
+   <BorderPane fx:id="mainShell">
+      <top>
+         <HBox styleClass="login-chrome" alignment="CENTER_LEFT" spacing="12">
+            <HBox fx:id="dragChromeLeft" alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
+               <ImageView fitHeight="22" fitWidth="22" preserveRatio="true" pickOnBounds="true" styleClass="login-chrome-logo">
+                  <image>
+                     <Image url="@../../images/osinergmin-logo.png" />
+                  </image>
+               </ImageView>
+               <Label text="Osinergmin Firmador" styleClass="login-chrome-title" />
+            </HBox>
+            <Label fx:id="connectionLabel" text="Comprobando conexión…" />
+            <Button focusTraversable="false" onAction="#onOpenSettings" text="⚙" styleClass="login-settings-btn" />
+            <HBox spacing="2" alignment="CENTER_RIGHT" styleClass="login-window-controls">
+               <Button focusTraversable="false" onAction="#onMinimize" text="-" styleClass="login-window-btn" prefWidth="42" />
+               <Button fx:id="maximizeButton" focusTraversable="false" onAction="#onMaximize" text="□" styleClass="login-window-btn" prefWidth="42" />
+               <Button focusTraversable="false" onAction="#onClose" text="X" styleClass="login-window-btn login-window-btn-close" prefWidth="42" />
+            </HBox>
+         </HBox>
+      </top>
+      <center>
+         <StackPane fx:id="loginFormRoot" styleClass="login-backdrop">
+            <VBox styleClass="login-card" maxWidth="400" alignment="TOP_CENTER" spacing="24"
+                  StackPane.alignment="CENTER">
+               <ImageView fitWidth="120" fitHeight="120" preserveRatio="true" pickOnBounds="true" styleClass="login-brand-logo">
+                  <image>
+                     <Image url="@../../images/osinergmin-logo-principal.png" />
+                  </image>
+               </ImageView>
+               <VBox alignment="CENTER" spacing="4">
+                  <Label text="Acceso Institucional" styleClass="login-heading" />
+                  <Label text="Firma Digital Osinergmin" styleClass="login-subheading" />
+               </VBox>
+               <VBox spacing="16" fillWidth="true">
+                  <VBox spacing="8">
+                     <Label text="USUARIO" styleClass="login-field-label" />
+                     <HBox spacing="10" alignment="CENTER_LEFT" styleClass="login-field-row">
+                        <Label text="👤" styleClass="login-field-glyph" minWidth="20" />
+                        <TextField fx:id="userField" promptText="nombre.apellido" HBox.hgrow="ALWAYS" />
+                     </HBox>
+                  </VBox>
+                  <VBox spacing="8">
+                     <Label text="CONTRASEÑA" styleClass="login-field-label" />
+                     <HBox spacing="10" alignment="CENTER_LEFT" styleClass="login-field-row">
+                        <Label text="🔒" styleClass="login-field-glyph" minWidth="20" />
+                        <PasswordField fx:id="passwordField" HBox.hgrow="ALWAYS" />
+                     </HBox>
+                  </VBox>
+               </VBox>
+               <HBox alignment="CENTER_LEFT">
+                  <CheckBox fx:id="rememberCheck" mnemonicParsing="false" text="Recordarme" styleClass="login-remember" />
+                  <Region HBox.hgrow="ALWAYS" minWidth="8" />
+                  <Hyperlink onAction="#onHelp" text="¿Necesitas ayuda?" styleClass="login-help-link"
+                             visible="false" managed="false" />
+               </HBox>
+               <Button fx:id="loginSubmitButton" defaultButton="true" onAction="#onLogin" text="Iniciar sesión" styleClass="btn-primary login-submit-btn" maxWidth="Infinity" />
+               <HBox fx:id="errorBox" visible="false" managed="false" spacing="8" alignment="CENTER_LEFT" styleClass="login-error-row">
+                  <Label text="●" styleClass="login-error-bullet" />
+                  <Label fx:id="errorMessageLabel" text="Credenciales incorrectas" styleClass="login-error-text" />
+               </HBox>
+            </VBox>
+         </StackPane>
+      </center>
+      <bottom>
+         <HBox styleClass="footer-bar" alignment="CENTER_LEFT" spacing="16" visible="false" managed="false">
+            <Label text="V2.4.0-STABLE | SISTEMA DE FIRMA DIGITAL OSINERGMIN" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Hyperlink onAction="#onFooterServiceStatus" text="ESTADO DEL SERVICIO" />
+            <Label text="|" styleClass="login-footer-sep" />
+            <Hyperlink onAction="#onFooterSupport" text="SOPORTE TÉCNICO" />
+         </HBox>
+      </bottom>
+   </BorderPane>
+
+   <!-- Capa modal: validación de servicios (sobre contenido borroso) -->
+   <StackPane fx:id="validationOverlay" mouseTransparent="true" visible="false" managed="false"
+              maxWidth="Infinity" maxHeight="Infinity">
+      <Region maxWidth="Infinity" maxHeight="Infinity" styleClass="validation-dimmer" />
+      <VBox fx:id="validationModalRoot" styleClass="validation-modal" spacing="16" StackPane.alignment="CENTER">
+         <HBox spacing="14" alignment="CENTER_LEFT">
+            <ImageView fitWidth="48" fitHeight="48" preserveRatio="true" pickOnBounds="true" styleClass="validation-brand-logo">
+               <image>
+                  <Image url="@../../images/osinergmin-logo-principal.png" />
+               </image>
+            </ImageView>
+            <VBox spacing="6">
+               <Label text="Osinergmin" styleClass="validation-brand-title" />
+               <Label text="FIRMA DIGITAL • V2.4.0" styleClass="validation-brand-subtitle" />
+            </VBox>
+         </HBox>
+
+         <Region maxWidth="Infinity" prefHeight="1" minHeight="1" styleClass="validation-header-divider" />
+
+         <ProgressBar fx:id="validationProgressBar" styleClass="validation-progress" maxWidth="Infinity" prefHeight="10" progress="0" />
+
+         <VBox styleClass="validation-task-list" spacing="0" fillWidth="true">
+            <HBox fx:id="validationRow1" spacing="12" alignment="CENTER_LEFT" styleClass="validation-task-row">
+               <Label fx:id="validationGlyph1" alignment="CENTER" minWidth="24" prefWidth="24" />
+               <Label fx:id="validationText1" text="Validando librerías criptográficas..." styleClass="validation-task-label" wrapText="true" HBox.hgrow="ALWAYS" />
+            </HBox>
+            <HBox fx:id="validationRow2" spacing="12" alignment="CENTER_LEFT" styleClass="validation-task-row">
+               <Label fx:id="validationGlyph2" alignment="CENTER" minWidth="24" prefWidth="24" />
+               <Label fx:id="validationText2" text="Cargando certificados locales..." styleClass="validation-task-label" wrapText="true" HBox.hgrow="ALWAYS" />
+            </HBox>
+            <HBox fx:id="validationRow3" spacing="12" alignment="CENTER_LEFT" styleClass="validation-task-row">
+               <Label fx:id="validationGlyph3" alignment="CENTER" minWidth="24" prefWidth="24" />
+               <Label fx:id="validationText3" text="Inicializando sesión..." styleClass="validation-task-label" wrapText="true" HBox.hgrow="ALWAYS" />
+            </HBox>
+         </VBox>
+      </VBox>
+   </StackPane>
+</StackPane>

@@ -1,0 +1,34 @@
+# Dockerfile para build de MSI de Osinergmin Firmador
+# Basado en Windows Server Core para soportar jpackage y WiX Toolset
+
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+# 1. Instalar JDK 21 (Microsoft Build of OpenJDK)
+RUN Invoke-WebRequest -Uri "https://aka.ms/download-jdk/microsoft-jdk-21.0.3-windows-x64.msi" -OutFile "jdk.msi"; \
+    Start-Process msiexec.exe -ArgumentList '/i jdk.msi /quiet /qn /norestart' -Wait; \
+    Remove-Item jdk.msi
+
+# 2. Instalar Maven
+ENV MAVEN_VERSION 3.9.6
+RUN Invoke-WebRequest -Uri "https://archive.apache.org/dist/maven/maven-3/$env:MAVEN_VERSION/binaries/apache-maven-$env:MAVEN_VERSION-bin.zip" -OutFile "maven.zip"; \
+    Expand-Archive maven.zip -DestinationPath "C:\"; \
+    Move-Item "C:\apache-maven-$env:MAVEN_VERSION" "C:\maven"; \
+    Remove-Item maven.zip
+
+# 3. Instalar WiX Toolset v3.14 (requerido por jpackage para MSI)
+RUN Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314.exe" -OutFile "wix.exe"; \
+    Start-Process .\wix.exe -ArgumentList '/quiet /norestart' -Wait; \
+    Remove-Item wix.exe
+
+# Configurar variables de entorno
+ENV JAVA_HOME="C:\Program Files\Microsoft\jdk-21.0.3.9-hotspot"
+ENV M2_HOME="C:\maven"
+RUN $env:Path = 'C:\maven\bin;C:\Program Files (x86)\WiX Toolset v3.14\bin;' + $env:Path; \
+    [Environment]::SetEnvironmentVariable('Path', $env:Path, [EnvironmentVariableTarget]::Machine)
+
+WORKDIR C:\build
+
+# El comando por defecto construye el MSI usando el script existente
+CMD ["powershell", ".\installer\build-installer.ps1 -Msi"]

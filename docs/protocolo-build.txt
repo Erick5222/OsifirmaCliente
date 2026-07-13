@@ -1,0 +1,71 @@
+PROTOCOLO DE CONSTRUCCION Y CI/CD - OSINERGMIN FIRMADOR
+======================================================
+
+1. DESCRIPCION DEL SISTEMA
+--------------------------
+Este sistema automatiza la construccion de la aplicacion JavaFX y la generacion 
+de un instalador MSI para Windows. Utiliza Maven para la gestion de dependencias 
+y jpackage (JDK 21+) junto con WiX Toolset para el empaquetado nativo.
+
+2. REQUISITOS PARA EJECUCION LOCAL
+----------------------------------
+Para generar el MSI en su maquina local necesita:
+- JDK 21 o superior (debe incluir jpackage.exe).
+- Maven 3.6 o superior.
+- WiX Toolset v3.11 o v3.14 (instalado y en el PATH).
+- Sistema Operativo Windows (necesario para generar MSI).
+
+3. CONSTRUCCION LOCAL
+---------------------
+Ejecute el siguiente script desde la raiz del proyecto:
+   .\installer\build-installer.ps1 -Msi
+
+Este script realizara:
+- Limpieza de builds anteriores.
+- Compilacion y empaquetado de JARs.
+- Generacion del instalador MSI en: target\installer\dist\
+
+4. FLUJO CON DOCKER (WINDOWS)
+-----------------------------
+Se incluye un 'Dockerfile.windows' para crear un entorno de build controlado.
+Nota: Requiere Docker configurado para 'Windows Containers'.
+
+Para construir la imagen:
+   docker build -t firmador-builder -f Dockerfile.windows .
+
+Para generar el MSI usando Docker:
+   docker run --rm -v ${PWD}:C:\build firmador-builder
+
+Limitacion: Docker Desktop en Windows suele usar contenedores Linux por defecto. 
+Debe cambiar a 'Windows Containers' para que jpackage y WiX funcionen.
+
+5. PIPELINE CI/CD (GITHUB ACTIONS)
+----------------------------------
+El archivo '.github/workflows/msi-build.yml' contiene la automatizacion.
+- Se dispara al hacer PUSH a 'main' o al crear un TAG (v1.0.0).
+- Usa un runner 'windows-latest' (nativo), que es mas rapido que Docker Windows.
+- Etapas: Checkout -> Setup JDK -> Build MSI -> Upload Artifact.
+- Si se crea un TAG, el MSI se publica automaticamente en la seccion 'Releases'.
+
+6. VERSIONAMIENTO
+-----------------
+El instalador toma la version de la propiedad <installer.app.version> en el pom.xml.
+Para publicar una nueva version:
+1. Actualice <installer.app.version> en el pom.xml (ej: 2.4.1).
+2. Haga push a main.
+3. (Opcional) Cree un tag: git tag v2.4.1 && git push origin v2.4.1
+
+7. DEPURACION DE ERRORES COMUNES
+--------------------------------
+- "WiX Toolset no detectado": Verifique que candle.exe y light.exe esten en el PATH.
+- "jpackage no reconocido": Asegurese de usar un JDK completo (no solo JRE).
+- "Error 1638 al instalar": Windows no permite instalar la misma version dos veces. 
+  Incremente el numero de version o desinstale la anterior.
+- "Docker falla": Verifique que Docker este en modo 'Windows Containers'.
+
+8. ARCHIVOS CLAVE
+-----------------
+- pom.xml: Configuracion de build y version.
+- installer/wix/main.wxs: Plantilla para el instalador MSI.
+- installer/build-installer.ps1: Script principal de empaquetado.
+- .github/workflows/msi-build.yml: Definicion del pipeline.

@@ -1,0 +1,17 @@
+{
+  "invocacion": {
+    "idSolicitud": "CP-08-INVISIBLE",
+    "origenDocumento": "alfresco",
+    "nodeIdAlfresco": "21141947-3136-4717-9419-473136d717db",
+    "FirmaArrastrar": false,
+    "sinVisor": true
+  },
+  "param": {
+    "signatureStyle": 0,
+    "applyImage": false,
+    "signatureReason": "Firma invisible — CP-08",
+    "destinationPath": "12bc7696-1764-4b99-9aa7-63077d4399d5",
+    "fileName": "firmaInvisible1.pdf"
+  }
+}
+

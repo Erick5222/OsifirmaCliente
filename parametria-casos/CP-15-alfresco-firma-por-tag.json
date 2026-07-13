@@ -1,0 +1,21 @@
+{
+  "invocacion": {
+    "idSolicitud": "CP-15-TAG-GYAURI",
+    "token": "${JWT_TOKEN}",
+    "callbackUrl": "http://localhost:8080/firma-digital/api/firma/callback",
+    "origenDocumento": "alfresco",
+    "nodeIdAlfresco": "a43cef78-7b52-4c36-bcef-787b526c367e",
+    "documentVersion": 1,
+    "FirmaArrastrar": false,
+    "cerrarAlTerminar": true
+  },
+  "param": {
+    "signatureFormat": 1,
+    "destinationPath": "12bc7696-1764-4b99-9aa7-63077d4399d5",
+    "fileName": "informe_firmado_tag.pdf",
+    "positioningMode": "TA",
+    "signatureTagName": "GYAURI",
+    "signatureStyle": 1,
+    "applyImage": false
+  }
+}

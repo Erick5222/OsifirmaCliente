@@ -1,0 +1,37 @@
+Documento pensado para acompañar al diagrama lógico (Arquitectura Hexagonal).
+
+1. PROPÓSITO Y ALCANCE DEL DIAGRAMA
+
+El diagrama adjunto describe la descomposición lógica del Servicio de Firma Digital y el flujo conceptual entre consumidores, núcleo del servicio y sistemas externos. Está fundamentado en un patrón de Arquitectura Hexagonal (Puertos y Adaptadores) para garantizar un desacoplamiento efectivo entre la lógica de negocio y los agentes externos. Este diagrama es una vista lógica: no pretende reflejar dimensionamiento de infraestructura (nodos Kubernetes, cantidad de réplicas, VMs, capacidad de Oracle en IOPS/espacio, etc.). Ese dimensionamiento se formalizará en un apartado de requisitos no funcionales y volumetría, y/o en un diagrama de despliegue complementario, una vez que existan los insumos cuantitativos acordados con el negocio.
+
+2. DESCRIPCIÓN DE LA ARQUITECTURA LÓGICA
+
+2.1 Zona de cliente (capa de consumo). El ecosistema interactúa con el servicio a través de diversos puntos de entrada: Portales web, Cliente de escritorio y otros Consumidores de servicios. Estos actores envían peticiones hacia el núcleo de la solución.
+
+2.2 Adaptador de entrada (Adapter IN). Actúa como el borde de entrada del hexágono, implementando controladores con métodos de consumo. Esta capa recibe las solicitudes, participa en la gestión de la seguridad mediante la integración con Keycloak (validación de identidad y tokens) y dirige el flujo hacia la lógica interna.
+
+2.3 Núcleo hexagonal (lógica de negocio). Capa de aplicación: contiene la lógica de negocio y los casos de uso que orquestan las operaciones del sistema, incluyendo la coordinación de la persistencia de metadata y estados de proceso cuando corresponda. Dominio: define la esencia del negocio mediante la definición de clases e interfaces; es el centro del hexágono y no posee dependencias hacia el exterior, de modo que reglas de negocio e invariantes permanecen independientes de la tecnología concreta de infraestructura.
+
+2.4 Adaptador de salida (Adapter OUT). Implementa los procesos de comunicación con elementos externos y materializa, mediante adaptadores concretos, las interfaces definidas por el dominio: Alfresco, para gestión y almacenamiento de documentos binarios; Base de datos, para persistencia de metadata y respaldo de los datos de los procesos realizados según el diseño aplicado.
+
+3. REQUISITOS NO FUNCIONALES Y VOLUMETRÍA (INSUMOS PENDIENTES DE NEGOCIO)
+
+Para estimar de forma fundamentada tamaño de cluster, número de réplicas, capacidad de base de datos, necesidad de caché o de colas, límites de rate limiting en un API Gateway y consumo de red y almacenamiento, es necesario contar con datos que hoy deben ser provistos principalmente por el área de negocio. Como mínimo se recomienda: cantidad estimada de usuarios totales versus usuarios concurrentes en condiciones normales y en picos (sesiones activas, no solo usuarios dados de alta); perfil de uso: frecuencia de operaciones por usuario u organismo, estacionalidad y escenarios de pico explícitos (por ejemplo vencimientos regulatorios, campañas masivas); volumetría esperada: documentos firmados por día y por hora, con desglose o estimación para escenarios de pico versus operación habitual; tamaño promedio y máximo esperado del documento a firmar (y si existen adjuntos o variantes por tipo de trámite), dado que impacta directamente en uso de red, tiempo de procesamiento y requerimientos de almacenamiento en repositorios de documentos y en rutas críticas de la aplicación; proyección de crecimiento a uno (1) y tres (3) años sobre los puntos anteriores, para evitar infraestructura obsoleta a corto plazo.
+
+Sin estos insumos, las decisiones listadas más abajo quedan en estado "pendiente de cálculo", no por ausencia de criterio técnico, sino porque el dimensionamiento debe anclarse en premisas explícitas y medibles.
+
+4. RELACIÓN ENTRE VOLUMETRÍA Y DECISIONES DE INFRAESTRUCTURA
+
+De forma orientativa (el detalle numérico se completará cuando existan los datos negociados): usuarios concurrentes y tasa de peticiones orientan réplicas mínimas y máximas del microservicio en Kubernetes, límites y políticas en el API Gateway (incluyendo rate limiting), y dimensionamiento de pools de conexiones hacia Oracle y otros sistemas; volumen de firmas por unidad de tiempo y picos permiten decidir si se requiere un gestor de colas para absorber picos, procesamiento asíncrono, o mayor paralelismo en workers sin degradar tiempos de respuesta síncronos donde el negocio lo exija; distribución de lecturas repetitivas versus escrituras y latencia aceptable pueden justificar una capa de caché (por ejemplo Redis) para ciertos datos de referencia o acelerar escenarios de lectura, validando la conveniencia con números y no de forma genérica; base de datos Oracle: conexiones máximas previstas, espacio para metadata e históricos, y requisitos de IOPS dependen del volumen transaccional, del modelo de persistencia y de las políticas de retención y auditoría; tamaño de documentos y patrones de subida/descarga condicionan ancho de banda, timeouts, diseño de transferencias y capacidad en Alfresco (u otro repositorio institucional equivalente).
+
+El microservicio puede seguir modelado en el diagrama lógico actual; las opciones anteriores (Gateway, Redis, colas, réplicas, nodos) se documentarán en la fase de despliegue y capacidad con base en la volumetría acordada.
+
+5. DIMENSIONAMIENTO Y PRÓXIMOS PASOS
+
+Cuando el negocio entregue las premisas mínimas (concurrentes, volumen diario de firmas, proyección 1 y 3 años, y tamaño de documento), el equipo técnico podrá: proponer sizing preliminar de nodos Kubernetes y número de réplicas del servicio de firma (y componentes colindantes si aplican); estimar requerimientos de Oracle (conexiones, almacenamiento, IOPS) alineados a políticas de respaldo y recuperación definidas por la institución; decidir con evidencia la necesidad de caché, cola y límites de rate limiting, y reflejarlo en un diagrama de despliegue o en la matriz de requisitos no funcionales del proyecto.
+
+Hasta entonces, el presente documento deja constancia de la arquitectura lógica y de las dependencias de información para el dimensionamiento, cerrando la brecha entre el diagrama funcional y los criterios de capacidad solicitados por revisión.
+
+6. CONCLUSIÓN
+
+El diseño asegura que el flujo sea dirigido desde los actores externos (zona de cliente) hacia el núcleo lógico (aplicación y dominio), y que las interacciones con sistemas institucionales (Alfresco, base de datos, Keycloak) se realicen de forma estandarizada a través de adaptadores. La completitud del paquete de documentación de arquitectura se obtiene combinando esta vista lógica con la definición explícita de requisitos no funcionales y volumetría negociados, y con las decisiones de despliegue y capacidad derivadas de ellos.

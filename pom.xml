@@ -1,0 +1,435 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.osinergmin</groupId>
+    <artifactId>firma-desktop-client</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>21</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>21</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>21</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>pe.gob.osinergmin</groupId>
+            <artifactId>firmaOsinergmin</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.4</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.4</version>
+                <configuration>
+                    <mainClass>com.osinergmin.firma.desktop.App</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- Default configuration for running -->
+                        <!-- Usage: mvn clean javafx:run -->
+                        <id>default-cli</id>
+                    </execution>
+                    <execution>
+                        <!-- Configuration for manual attach debugging -->
+                        <!-- Usage: mvn clean javafx:run@debug -->
+                        <id>debug</id>
+                        <configuration>
+                            <options>
+                                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:8000</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Configuration for automatic IDE debugging -->
+                        <id>ide-debug</id>
+                        <configuration>
+                            <options>
+                                <option>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Configuration for automatic IDE profiling -->
+                        <id>ide-profile</id>
+                        <configuration>
+                            <options>
+				<option>${profiler.jvmargs.arg1}</option>
+				<option>${profiler.jvmargs.arg2}</option>
+				<option>${profiler.jvmargs.arg3}</option>
+				<option>${profiler.jvmargs.arg4}</option>
+				<option>${profiler.jvmargs.arg5}</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Instalador: mvn -Pinstaller package  o  .\installer\build-installer.ps1 -->
+    <profiles>
+        <profile>
+            <id>installer</id>
+            <properties>
+                <installer.app.name>Osinergmin Firmador</installer.app.name>
+                <!-- Versión publicada del MSI/app-image. Incrementar en cada release (ver installer/INSTALADOR.md). -->
+                <installer.app.version>1.0.3</installer.app.version>
+                <installer.vendor>Osinergmin</installer.vendor>
+                <!-- UpgradeCode fijo: identifica la familia de producto en Windows Installer.
+                     NO cambiar entre releases. Coincide con el UUID que jpackage deriva de vendor + nombre. -->
+                <installer.upgrade.uuid>1a061d36-ecd1-3c66-902f-c34278db464b</installer.upgrade.uuid>
+                <installer.type>app-image</installer.type>
+                <installer.main.module>com.osinergmin.firma.desktop</installer.main.module>
+                <installer.main.class>com.osinergmin.firma.desktop.App</installer.main.class>
+                <javafx.platform>win</javafx.platform>
+                <skip.jpackage>true</skip.jpackage>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.8.1</version>
+                        <executions>
+                            <execution>
+                                <id>installer-javafx-libs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/installer/staging/javafx</outputDirectory>
+                                    <includeScope>runtime</includeScope>
+                                    <includeGroupIds>org.openjfx</includeGroupIds>
+                                    <includeClassifiers>${javafx.platform}</includeClassifiers>
+                                    <excludeTransitive>false</excludeTransitive>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>installer-runtime-libs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/installer/staging/deps</outputDirectory>
+                                    <includeScope>runtime</includeScope>
+                                    <excludeGroupIds>org.openjfx</excludeGroupIds>
+                                    <excludeArtifactIds>jakarta.activation</excludeArtifactIds>
+                                    <excludeTransitive>false</excludeTransitive>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>installer-stage-libs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/installer/libs"/>
+                                        <mkdir dir="${project.build.directory}/installer/portable"/>
+                                        <mkdir dir="${project.build.directory}/installer/portable/assets"/>
+                                        <mkdir dir="${project.build.directory}/installer/assets"/>
+                                        <mkdir dir="${project.build.directory}/installer/jpackage-resources/assets"/>
+                                        <copy file="${project.basedir}/installer/assets/osinergmin-sello.png"
+                                              tofile="${project.build.directory}/installer/assets/osinergmin-sello.png"
+                                              failonerror="true"/>
+                                        <copy file="${project.basedir}/installer/assets/osinergmin-sello.png"
+                                              tofile="${project.build.directory}/installer/portable/assets/osinergmin-sello.png"
+                                              failonerror="true"/>
+                                        <copy file="${project.basedir}/installer/assets/osinergmin-sello.png"
+                                              tofile="${project.build.directory}/installer/jpackage-resources/assets/osinergmin-sello.png"
+                                              failonerror="true"/>
+                                        <copy file="${project.basedir}/installer/wix/main.wxs"
+                                              tofile="${project.build.directory}/installer/jpackage-resources/main.wxs"
+                                              overwrite="true"/>
+                                        <copy todir="${project.build.directory}/installer/libs" failonerror="true">
+                                            <fileset dir="${project.build.directory}/installer/staging/javafx" includes="*.jar"/>
+                                            <fileset dir="${project.build.directory}/installer/staging/deps" includes="*.jar"/>
+                                        </copy>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                              todir="${project.build.directory}/installer/libs"
+                                              failonerror="true"/>
+                                        <copy file="${project.basedir}/installer/portable-launch.bat"
+                                              tofile="${project.build.directory}/installer/portable/OsinergminFirmador.bat"
+                                              overwrite="true"/>
+                                        <copy file="${project.basedir}/installer/portable-launch.bat"
+                                              tofile="${project.build.directory}/installer/OsinergminFirmador.bat"
+                                              overwrite="true"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>installer-clean-dist</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skip.jpackage}</skip>
+                                    <target>
+                                        <delete dir="${project.build.directory}/installer/dist" quiet="true"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>installer-jpackage</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skip.jpackage}</skip>
+                                    <executable>jpackage</executable>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <arguments>
+                                        <argument>--type</argument>
+                                        <argument>${installer.type}</argument>
+                                        <argument>--name</argument>
+                                        <argument>${installer.app.name}</argument>
+                                        <argument>--app-version</argument>
+                                        <argument>${installer.app.version}</argument>
+                                        <argument>--vendor</argument>
+                                        <argument>${installer.vendor}</argument>
+                                        <argument>--win-upgrade-uuid</argument>
+                                        <argument>${installer.upgrade.uuid}</argument>
+                                        <argument>--dest</argument>
+                                        <argument>${project.build.directory}/installer/dist</argument>
+                                        <argument>--resource-dir</argument>
+                                        <argument>${project.build.directory}/installer/jpackage-resources</argument>
+                                        <argument>--input</argument>
+                                        <argument>${project.build.directory}/installer/libs</argument>
+                                        <argument>--main-jar</argument>
+                                        <argument>${project.build.finalName}.jar</argument>
+                                        <argument>--main-class</argument>
+                                        <argument>${installer.main.class}</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>--module-path=$APPDIR</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>--add-modules=javafx.controls,javafx.fxml,javafx.swing</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>-Dfirma.parametria.enabled=false</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>-Dfirma.signing.image.path=$APPDIR/assets/osinergmin-sello.png</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- macOS: mvn -Pinstaller-mac package  o  ./installer/build-installer-macos.sh -->
+        <profile>
+            <id>installer-mac</id>
+            <properties>
+                <installer.app.name>Osinergmin Firmador</installer.app.name>
+                <installer.app.version>1.0.3</installer.app.version>
+                <installer.vendor>Osinergmin</installer.vendor>
+                <!-- mac en Intel; mac-aarch64 en Apple Silicon (GitHub Actions macos-latest) -->
+                <javafx.platform>mac-aarch64</javafx.platform>
+                <installer.type>app-image</installer.type>
+                <installer.mac.bundle-id>com.osinergmin.firma.desktop</installer.mac.bundle-id>
+                <installer.main.module>com.osinergmin.firma.desktop</installer.main.module>
+                <installer.main.class>com.osinergmin.firma.desktop.App</installer.main.class>
+                <skip.jpackage>true</skip.jpackage>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.8.1</version>
+                        <executions>
+                            <execution>
+                                <id>installer-javafx-libs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/installer/staging/javafx</outputDirectory>
+                                    <includeScope>runtime</includeScope>
+                                    <includeGroupIds>org.openjfx</includeGroupIds>
+                                    <includeClassifiers>${javafx.platform}</includeClassifiers>
+                                    <excludeTransitive>false</excludeTransitive>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>installer-runtime-libs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/installer/staging/deps</outputDirectory>
+                                    <includeScope>runtime</includeScope>
+                                    <excludeGroupIds>org.openjfx</excludeGroupIds>
+                                    <excludeArtifactIds>jakarta.activation</excludeArtifactIds>
+                                    <excludeTransitive>false</excludeTransitive>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>installer-stage-libs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/installer/libs"/>
+                                        <mkdir dir="${project.build.directory}/installer/assets"/>
+                                        <mkdir dir="${project.build.directory}/installer/jpackage-resources/assets"/>
+                                        <copy file="${project.basedir}/installer/assets/osinergmin-sello.png"
+                                              tofile="${project.build.directory}/installer/assets/osinergmin-sello.png"
+                                              failonerror="true"/>
+                                        <copy file="${project.basedir}/installer/assets/osinergmin-sello.png"
+                                              tofile="${project.build.directory}/installer/jpackage-resources/assets/osinergmin-sello.png"
+                                              failonerror="true"/>
+                                        <copy todir="${project.build.directory}/installer/libs" failonerror="true">
+                                            <fileset dir="${project.build.directory}/installer/staging/javafx" includes="*.jar"/>
+                                            <fileset dir="${project.build.directory}/installer/staging/deps" includes="*.jar"/>
+                                        </copy>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                              todir="${project.build.directory}/installer/libs"
+                                              failonerror="true"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>installer-clean-dist</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skip.jpackage}</skip>
+                                    <target>
+                                        <delete dir="${project.build.directory}/installer/dist" quiet="true"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>installer-jpackage</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skip.jpackage}</skip>
+                                    <executable>jpackage</executable>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <arguments>
+                                        <argument>--type</argument>
+                                        <argument>${installer.type}</argument>
+                                        <argument>--name</argument>
+                                        <argument>${installer.app.name}</argument>
+                                        <argument>--app-version</argument>
+                                        <argument>${installer.app.version}</argument>
+                                        <argument>--vendor</argument>
+                                        <argument>${installer.vendor}</argument>
+                                        <argument>--mac-package-identifier</argument>
+                                        <argument>${installer.mac.bundle-id}</argument>
+                                        <argument>--dest</argument>
+                                        <argument>${project.build.directory}/installer/dist</argument>
+                                        <argument>--resource-dir</argument>
+                                        <argument>${project.build.directory}/installer/jpackage-resources</argument>
+                                        <argument>--input</argument>
+                                        <argument>${project.build.directory}/installer/libs</argument>
+                                        <argument>--main-jar</argument>
+                                        <argument>${project.build.finalName}.jar</argument>
+                                        <argument>--main-class</argument>
+                                        <argument>${installer.main.class}</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>--module-path=$APPDIR</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>--add-modules=javafx.controls,javafx.fxml,javafx.swing</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>-Dfirma.parametria.enabled=false</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>-Dfirma.signing.image.path=$APPDIR/assets/osinergmin-sello.png</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

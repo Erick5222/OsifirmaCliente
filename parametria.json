@@ -1,0 +1,21 @@
+{
+  "invocacion": {
+    "idSolicitud": "CP-17-INTERFAZ-MINIMA",
+    "token": "${JWT_TOKEN}",
+    "callbackUrl": "http://localhost:8080/api/firma/callback",
+    "origenDocumento": "alfresco",
+    "nodeIdAlfresco": "21141947-3136-4717-9419-473136d717db",
+    "documentVersion": 1,
+    "sinVisor": true,
+    "modo": "soloFirma",
+    "FirmaArrastrar": false,
+    "interfazMinima": true
+
+  },
+  "param": {
+    "destinationPath": "12bc7696-1764-4b99-9aa7-63077d4399d5",
+    "fileName": "informe_firmado_dat3.pdf",
+    "positionx": 10,
+    "positiony": 400
+  }
+}

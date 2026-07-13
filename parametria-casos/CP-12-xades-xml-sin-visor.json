@@ -1,0 +1,22 @@
+{
+  "invocacion": {
+    "idSolicitud": "CP-12-XADES-ALF",
+    "token": "${JWT_TOKEN}",
+    "origenDocumento": "alfresco",
+    "nodeIdAlfresco": "32cf0445-3513-4571-8f04-45351365718b",
+    "documentVersion": 1,
+    "contentType": "application/xml",
+    "sinVisor": true,
+    "modo": "soloFirma",
+    "FirmaArrastrar": false
+  },
+  "param": {
+    "signatureFormat": 2,
+    "signatureLevel": "B",
+    "fileName": "documento_alfresco.xml",
+    "applyImage": false,
+    "signatureStyle": 4,
+    "signatureReason": "Prueba XAdES Alfresco — CP-12",
+     "destinationPath": "12bc7696-1764-4b99-9aa7-63077d4399d5"
+  }
+}

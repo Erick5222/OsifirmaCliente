@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+; Plantilla manual (solo portable / app-image). El MSI ya registra el protocolo via installer/wix/main.wxs
+; 1. Copie este archivo a register-protocol.reg
+; 2. Reemplace RUTA_AL_EXE por la ruta real del .exe (comillas incluidas en el comando)
+; 3. Ejecute register-protocol.reg como administrador
+
+[HKEY_CLASSES_ROOT\osinergmin-firmador]
+@="URL:Osinergmin Firmador"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\osinergmin-firmador\shell\open\command]
+@="\"RUTA_AL_EXE\" \"%1\""

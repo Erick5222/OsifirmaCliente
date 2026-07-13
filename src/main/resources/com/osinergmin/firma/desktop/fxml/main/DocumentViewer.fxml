@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.osinergmin.firma.desktop.ui.viewer.DocumentViewerController"
+            maxWidth="Infinity" maxHeight="Infinity"
+            styleClass="pdf-viewer-root">
+
+   <top>
+      <VBox spacing="0" fillWidth="true">
+         <HBox styleClass="pdf-viewer-toolbar" alignment="CENTER_LEFT" spacing="16">
+            <padding>
+               <Insets top="10" right="18" bottom="10" left="18" />
+            </padding>
+            <Label fx:id="fileNameLabel" styleClass="pdf-viewer-filename" text="—" />
+            <Region HBox.hgrow="ALWAYS" minWidth="12" />
+            <Button focusTraversable="false" mnemonicParsing="false" fx:id="prevPageButton" onAction="#onPrevPage"
+                    contentDisplay="GRAPHIC_ONLY" graphicTextGap="0"
+                    styleClass="button pdf-viewer-icon-btn" prefWidth="42" minWidth="42">
+               <graphic>
+                  <Text styleClass="pdf-viewer-glyph" text="&lt;" />
+               </graphic>
+            </Button>
+            <Label fx:id="pageLabel" styleClass="pdf-viewer-page-label" text="Página — de —" />
+            <Button focusTraversable="false" mnemonicParsing="false" fx:id="nextPageButton" onAction="#onNextPage"
+                    contentDisplay="GRAPHIC_ONLY" graphicTextGap="0"
+                    styleClass="button pdf-viewer-icon-btn" prefWidth="42" minWidth="42">
+               <graphic>
+                  <Text styleClass="pdf-viewer-glyph" text="&gt;" />
+               </graphic>
+            </Button>
+            <Region prefWidth="8" minWidth="8" />
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#onZoomOut"
+                    contentDisplay="GRAPHIC_ONLY" graphicTextGap="0"
+                    styleClass="button pdf-viewer-icon-btn" prefWidth="42" minWidth="42">
+               <graphic>
+                  <Text styleClass="pdf-viewer-glyph" text="-" />
+               </graphic>
+            </Button>
+            <Label fx:id="zoomPercentLabel" styleClass="pdf-viewer-zoom-label" text="100%" />
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#onZoomIn"
+                    contentDisplay="GRAPHIC_ONLY" graphicTextGap="0"
+                    styleClass="button pdf-viewer-icon-btn" prefWidth="42" minWidth="42">
+               <graphic>
+                  <Text styleClass="pdf-viewer-glyph" text="+" />
+               </graphic>
+            </Button>
+            <Region prefWidth="8" minWidth="8" />
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#onPrint" text="Imprimir"
+                    styleClass="cert-modal-btn cert-modal-btn-secondary" />
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#onDownload" text="Descargar"
+                    styleClass="cert-modal-btn cert-modal-btn-primary" />
+         </HBox>
+         <HBox fx:id="signatureRow" styleClass="pdf-viewer-signature-row" alignment="CENTER_LEFT" spacing="14">
+            <padding>
+               <Insets top="0" right="18" bottom="10" left="18" />
+            </padding>
+            <VBox spacing="2">
+               <Label styleClass="pdf-viewer-sig-hint-title" text="Colocación de firma (simulación)" />
+               <Label styleClass="pdf-viewer-sig-hint-sub" text="No modifica el PDF; solo vista previa de posición."
+                      wrapText="true" maxWidth="420" />
+            </VBox>
+            <VBox fx:id="signatureDragChip" alignment="CENTER" spacing="4" styleClass="signature-drag-chip">
+               <padding>
+                  <Insets top="10" right="14" bottom="10" left="14" />
+               </padding>
+               <Label styleClass="signature-drag-chip-title" text="✎  Firma" />
+               <Label styleClass="signature-drag-chip-sub" text="Arrastrar →" />
+            </VBox>
+            <Label styleClass="pdf-viewer-sig-inline-help" wrapText="true" maxWidth="360"
+                   text="Suelte sobre la página blanca para fijar la marca. Puede arrastrarla de nuevo para moverla. Pinche ✕ para quitar." />
+         </HBox>
+         <HBox fx:id="continueRow" styleClass="pdf-viewer-continue-row" alignment="CENTER_RIGHT" spacing="10">
+            <padding>
+               <Insets top="8" right="18" bottom="8" left="18" />
+            </padding>
+            <Button fx:id="backToSummaryButton" focusTraversable="false" mnemonicParsing="false"
+                    onAction="#onBackToSummary" text="Volver al resumen"
+                    visible="false" managed="false"
+                    styleClass="cert-modal-btn cert-modal-btn-secondary" />
+            <Button fx:id="continueSigningButton" focusTraversable="false" mnemonicParsing="false"
+                    onAction="#onContinueSigning" text="Continuar con la firma"
+                    styleClass="cert-modal-btn cert-modal-btn-primary" />
+         </HBox>
+      </VBox>
+   </top>
+
+   <center>
+      <ScrollPane fx:id="scrollPane" fitToWidth="true" pannable="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED"
+                  styleClass="pdf-viewer-scroll" maxWidth="Infinity" maxHeight="Infinity" BorderPane.alignment="CENTER">
+         <StackPane styleClass="pdf-viewer-canvas" minWidth="400" minHeight="320" maxWidth="Infinity" maxHeight="Infinity">
+            <VBox alignment="CENTER" styleClass="pdf-viewer-page-outer" fillWidth="false">
+               <padding>
+                  <Insets top="24" right="24" bottom="32" left="24" />
+               </padding>
+               <StackPane styleClass="pdf-viewer-page-shell">
+                  <ImageView fx:id="pageImageView" preserveRatio="true" smooth="true" cache="true" />
+                  <Pane fx:id="signatureOverlayPane" pickOnBounds="true" mouseTransparent="false" />
+               </StackPane>
+            </VBox>
+         </StackPane>
+      </ScrollPane>
+   </center>
+
+   <bottom>
+      <HBox styleClass="pdf-viewer-footer" alignment="CENTER">
+         <padding>
+            <Insets top="6" right="12" bottom="6" left="12" />
+         </padding>
+         <Label fx:id="footerLabel" styleClass="pdf-viewer-footer-text"
+                text="V2.4.0-STABLE | SISTEMA DE FIRMA DIGITAL OSINERGMIN" />
+      </HBox>
+   </bottom>
+</BorderPane>

@@ -1,0 +1,84 @@
+name: Build Osinergmin Firmador macOS
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      package_type:
+        description: 'Tipo jpackage (app-image, dmg, pkg)'
+        required: false
+        default: 'app-image'
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout codigo
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Verificar herramientas
+      run: |
+        java -version
+        jpackage --version
+        uname -m
+        xcode-select -p || echo "AVISO: Xcode CLI tools no instaladas (DMG puede fallar)"
+
+    - name: Extraer version
+      run: |
+        VERSION=$(mvn help:evaluate -Pinstaller-mac -Dexpression=installer.app.version -q -DforceStdout)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version: $VERSION"
+
+    - name: Dependencia firmaOsinergmin
+      run: |
+        echo "::warning::La dependencia pe.gob.osinergmin:firmaOsinergmin:1.0 no esta en Maven Central."
+        echo "El build fallara hasta publicarla en GitHub Packages o agregar install-file en CI."
+        echo "Ver docs/INSTALADOR-MACOS.md seccion Dependencias."
+
+    - name: Construir empaquetado macOS
+      id: build
+      continue-on-error: true
+      run: |
+        chmod +x installer/build-installer-macos.sh
+        ./installer/build-installer-macos.sh ${{ github.event.inputs.package_type || 'app-image' }}
+
+    - name: Registrar resultado del build
+      if: always()
+      run: |
+        if [ "${{ steps.build.outcome }}" = "success" ]; then
+          echo "BUILD_STATUS=ok" >> $GITHUB_ENV
+        else
+          echo "BUILD_STATUS=failed" >> $GITHUB_ENV
+          echo "::warning::Build macOS fallo (esperado en fase 1 si falta firmaOsinergmin o signing). Revisar logs."
+        fi
+        DIST="target/installer/dist"
+        if [ -d "$DIST" ]; then
+          find "$DIST" -maxdepth 2 -type f -o -type d | head -20
+        fi
+
+    - name: Subir artefacto macOS
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Osinergmin-Firmador-macOS-${{ env.APP_VERSION }}
+        path: |
+          target/installer/dist/**
+        if-no-files-found: warn
+
+    - name: Subir log de build si fallo
+      if: steps.build.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: macOS-build-log-${{ env.APP_VERSION }}
+        path: |
+          target/surefire-reports/**
+        if-no-files-found: ignore

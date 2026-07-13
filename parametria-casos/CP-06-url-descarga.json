@@ -1,0 +1,13 @@
+{
+  "invocacion": {
+    "idSolicitud": "CP-06-URL",
+    "token": "${JWT_TOKEN}",
+    "callbackUrl": "http://localhost:8080/firma-digital/api/firma/callback",
+    "origenDocumento": "url",
+    "documentoUrl": "https://www.turnerlibros.com/wp-content/uploads/2021/02/ejemplo.pdf"
+  },
+  "param": {
+    "destinationPath": "12bc7696-1764-4b99-9aa7-63077d4399d5",
+    "fileName": "informe_firmado_dat4.pdf"
+  }
+}

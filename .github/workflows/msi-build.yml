@@ -1,0 +1,74 @@
+name: Build Osinergmin Firmador MSI
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+jobs:
+  build-msi:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'microsoft'
+        cache: 'maven'
+
+    - name: Instalar WiX Toolset
+      run: dotnet tool install --global wix --version 3.14.0 || true
+      # Nota: windows-latest ya suele incluir WiX 3.11/3.14 en el PATH.
+      # Si no, se puede instalar vía choco:
+      # choco install wixtoolset
+
+    - name: Extraer versión del tag (si aplica)
+      shell: bash
+      run: |
+        if [[ $GITHUB_REF == refs/tags/v* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        else
+          # Extraer versión del pom.xml si no hay tag
+          VERSION=$(mvn help:evaluate -Dexpression=installer.app.version -q -DforceStdout)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        fi
+
+    - name: Construir Aplicación e Instalador MSI
+      shell: powershell
+      run: |
+        # Ejecutar el script de build con el flag -Msi
+        # Se pasa la versión dinámica si se desea sobrescribir la del pom.xml
+        .\installer\build-installer.ps1 -Msi
+
+    - name: Renombrar MSI con versión
+      shell: powershell
+      run: |
+        $msi = Get-ChildItem "target\installer\dist\*.msi" | Select-Object -First 1
+        if ($msi) {
+          $newName = "Osinergmin-Firmador-${{ env.APP_VERSION }}.msi"
+          Move-Item $msi.FullName "target\installer\dist\$newName"
+          echo "MSI_PATH=target\installer\dist\$newName" >> $env:GITHUB_ENV
+        }
+
+    - name: Subir Artefacto MSI
+      uses: actions/upload-artifact@v4
+      with:
+        name: Osinergmin-Firmador-MSI
+        path: target/installer/dist/*.msi
+
+    - name: Crear Release (solo en tags)
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: target/installer/dist/*.msi
+        name: Release ${{ env.APP_VERSION }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

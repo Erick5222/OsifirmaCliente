@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DocumentoPrueba xmlns="urn:osinergmin:firma:prueba">
+  <id>CP-12</id>
+  <contenido>Documento XML de prueba para firma XAdES</contenido>
+</DocumentoPrueba>

@@ -1,0 +1,467 @@
+================================================================================
+  GUIA DE PARAMETRIA — Cliente desktop firma-desktop-client
+  Archivo: parametria.json (raiz del proyecto o ruta en client.properties)
+  Version documento: 1.0
+================================================================================
+
+1. ESTRUCTURA DEL ARCHIVO
+--------------------------------------------------------------------------------
+
+{
+  "invocacion": { ... },   // Como se lanza el firmador y de donde sale el PDF
+  "param": { ... },        // Reglas de firma (opcional; omite lo que use default)
+  "credential": "...",     // Certificado Windows (opcional)
+  "document": "...",       // PDF Base64 o ${DOCUMENT_BASE64} (opcional)
+  "stamp": "..."           // PNG sello Base64 (opcional)
+}
+
+Parametria minima: solo invocacion con los campos del escenario; el resto usa defaults
+(ver seccion 5). Casos de prueba en parametria-casos/ y variables en parametria-casos/README.txt
+
+Tambien funciona el formato plano antiguo (campos en la raiz del JSON).
+El formato recomendado es el de bloques invocacion + param + credential/document/stamp.
+
+Referencia minima: parametria.json.example
+Ejemplo con todos los campos (comentarios //): parametria.map.json — solo referencia, no cargar en la app
+
+
+2. BLOQUE invocacion
+--------------------------------------------------------------------------------
+
+Campo                  Tipo      Valores / opciones                    Uso
+---------------------  --------  ------------------------------------  ---------------------------
+idSolicitud            texto     Ej: SOL-2026-001                      ID de operacion; va al callback
+token                  texto     JWT Keycloak                          Login y APIs (Alfresco)
+refresh_token          texto     JWT refresh                           Renovar sesion
+callbackUrl            URL       http://host/api/firma/callback        POST JSON al terminar firma
+origenDocumento        texto     local | alfresco | url | bytes      De donde se obtiene el PDF
+rutaLocal              ruta      documento_prueba.pdf                  PDF en disco (origen local)
+documentoUrl           URL       URL temporal del portal               Descarga HTTP (origen url)
+nodeIdAlfresco         UUID      Id nodo Alfresco                      Documento en repositorio
+idDocumentoAlfresco    UUID      Alias de nodeIdAlfresco               Mismo proposito
+usarAlfresco           boolean   true / false                          Activa flujo Alfresco
+contentType            texto     application/pdf                       Tipo MIME (informativo)
+sinVisor               boolean   true / false                          true = omite visor PDF
+sinBandeja             boolean   true / false                          Reservado UI bandeja
+abrirVisorPrimero      boolean   true / false                          Reservado flujo bandeja
+modo                   texto     completo | soloFirma                  soloFirma tambien omite visor
+FirmaArrastrar         boolean   true / false                          true = arrastre en visor
+cerrarAlTerminar       boolean   true / false                          true = cierra la app tras firma exitosa
+interfazMinima         boolean   true / false                          UI minima en firma: oculta stepper/log, cierra al terminar; el usuario elige certificado
+
+
+2.1 Origen del documento — que llenar en cada caso
+--------------------------------------------------------------------------------
+
+Caso                          origenDocumento    Campos obligatorios / relevantes
+----------------------------  -----------------  ------------------------------------------
+PDF en disco (desarrollo)     local              rutaLocal y/o param.originPath
+Alfresco                      alfresco           usarAlfresco=true, nodeIdAlfresco, token
+URL del portal                url                documentoUrl, token (Bearer)
+PDF en memoria (sin Alfresco) bytes              document (Base64); origen se fuerza a bytes
+
+
+3. BLOQUE param — reglas de firma
+--------------------------------------------------------------------------------
+
+Campo                  Tipo      Valores disponibles                   Estado en desktop
+---------------------  --------  ------------------------------------  ---------------------------
+signatureFormat        entero    1=PAdES, 2=XAdES, 3=CAdES            2=XML; 3=.p7s; sin visor si no es PDF
+originPath             ruta      Ruta archivo local                    Complementa rutaLocal
+destinationPath        ruta      Ruta salida firmada                   Ruta local, UUID Alfresco, o alfresco:UUID (sube firmado)
+fileName               texto     contrato.pdf                          Nombre logico del documento
+signatureStyle         entero    0-4 (ver tabla 3.1)                   Conectado a tipoFirma
+applyImage             boolean   true / false                          Imagen stamp o signing.image.path
+stampTextSize          entero    Min. 7; default 13                      Tamanio texto sello
+stampWordWrap          entero    Default 37                            Leido; no usado aun
+SignatureTextTemplate  texto     Texto libre                           Va a infoContacto del motor
+positioningMode        texto     SD, SI, SM, MD, MI, MM, ID, II, IM   Preset de posicion (ver 3.2)
+signatureTagName       texto     Ej: GYAURI o «GYAURI»                 Texto ancla en PDF (PAdES)
+stampPage              entero    Desde 1                               Pagina del sello
+positionx              entero    Puntos PDF (ej. 10)                   Coordenada X
+positiony              entero    Puntos PDF (ej. 400)                  Coordenada Y (desde arriba)
+signatureLevel         texto     B | T | LTA                           B=1, T=2, LTA=3 en motor
+webTsa                 URL       URL TSA                               Vacio si nivel B
+userTsa                texto     Usuario TSA                           Opcional
+passwordTsa            texto     Clave TSA                             Opcional
+signatureReason        texto     Motivo de firma                       Ej: Firma digital OSINERGMIN
+
+
+3.1 signatureStyle (tipoFirma — referencia testFirmaOsinergmin)
+--------------------------------------------------------------------------------
+
+Valor   Significado
+-----   -----------
+0       Invisible
+1       Logo + texto (horizontal, lado derecho)
+2       Logo + texto (abajo)
+3       Solo logo
+4       Solo texto
+
+
+3.2 positioningMode (presets sobre pagina A4)
+--------------------------------------------------------------------------------
+
+Codigo   Ubicacion
+------   -----------
+SD       Superior derecha
+SI       Superior izquierda
+SM       Superior centro
+MD       Medio derecha
+MI       Medio izquierda
+MM       Medio centro
+ID       Inferior derecha
+II       Inferior izquierda
+IM       Inferior centro
+TA       Firma por texto (requiere signatureTagName; ignora presets SD..IM)
+
+Si positioningMode esta vacio, se usan positionx y positiony.
+
+
+3.3 Firma por etiqueta (signatureTagName + positioningMode TA)
+--------------------------------------------------------------------------------
+
+El PDF debe contener el texto ancla (ej. GYAURI o «GYAURI»). El desktop localiza el
+marcador con PDFBox y calcula pagina, posx y posy antes de llamar al motor PAdES.
+
+Ejemplo en param:
+
+  "positioningMode": "TA",
+  "signatureTagName": "GYAURI",
+  "positionx": 10,
+  "positiony": 400
+
+positionx/positiony son respaldo si el marcador no aparece en el documento.
+FirmaArrastrar debe ser false (si es true, gana el arrastre en el visor).
+
+Caso de prueba: parametria-casos/CP-15-alfresco-firma-por-tag.json
+
+
+3.4 Prioridad de posicion del sello
+--------------------------------------------------------------------------------
+
+1. FirmaArrastrar=true + usuario arrastra en visor  -> gana el visor
+2. FirmaArrastrar=false + signatureTagName          -> busca texto en PDF
+3. Dentro del param: positioningMode SD..IM         -> si no, positionx/positiony/stampPage
+4. Si falta todo: defaults de client.properties     -> posx=10, posy=400
+
+
+4. RAIZ: credential, document, stamp
+--------------------------------------------------------------------------------
+
+Campo       Tipo     Cuando llenarlo
+----------  -------  -------------------------------------------------------------
+credential  texto    Alias certificado Windows-MY. Vacio = usuario elige en pantalla
+document    Base64   PDF completo. Origen bytes o web sin Alfresco/URL
+stamp       Base64   PNG sello. Si vacio y applyImage=true -> signing.image.path
+
+Formato Base64: cadena pura o data:application/pdf;base64,XXXX
+
+
+5. VALORES POR DEFECTO (campo vacio u omitido)
+--------------------------------------------------------------------------------
+
+Campo              Default
+-----------------  ---------------------------
+signatureFormat    1 (PAdES)
+signatureStyle     1
+applyImage         true
+stampTextSize      13 (client.properties: signing.text.size)
+stampWordWrap      37
+stampPage          1
+positionx          10 (client.properties: signing.default.posx)
+positiony          400 (client.properties: signing.default.posy)
+signatureLevel     B
+signatureReason    Firma digital OSINERGMIN (client.properties: signing.reason)
+FirmaArrastrar     true
+sinBandeja         true (omite bandeja si no se indica)
+origenDocumento    local
+modo               completo
+contentType        application/pdf
+
+Imagen sello fallback: signing.image.path en client.properties
+
+
+6. CASOS DE USO — EJEMPLOS
+--------------------------------------------------------------------------------
+
+6.1 Alfresco + arrastre en visor (caso institucional tipico)
+------------------------------
+"invocacion": {
+  "origenDocumento": "alfresco",
+  "nodeIdAlfresco": "${NODE_ID_ALFRESCO}",
+  "token": "${JWT_TOKEN}",
+  "callbackUrl": "http://localhost:8080/api/firma/callback",
+  "FirmaArrastrar": true
+}
+
+6.1b Alfresco + posicion fija (sin arrastre)
+------------------------------
+"invocacion": {
+  "origenDocumento": "alfresco",
+  "nodeIdAlfresco": "${NODE_ID_ALFRESCO}",
+  "token": "${JWT_TOKEN}",
+  "callbackUrl": "http://localhost:8080/api/firma/callback",
+  "FirmaArrastrar": false
+},
+"param": {
+  "positionx": 10,
+  "positiony": 400
+}
+
+Documento desde Alfresco. Posicion por arrastre; param solo como fallback.
+
+
+6.2 Posicion fija desde portal (sin arrastre)
+------------------------------
+"invocacion": {
+  "FirmaArrastrar": false,
+  "origenDocumento": "alfresco",
+  "nodeIdAlfresco": "...",
+  "token": "..."
+},
+"param": {
+  "stampPage": 1,
+  "positionx": 10,
+  "positiony": 80
+}
+
+Visor visible sin chip de arrastre. Firma en coordenadas del param.
+
+
+6.3 Posicion por preset (inferior izquierda)
+------------------------------
+"invocacion": { "FirmaArrastrar": false },
+"param": {
+  "positioningMode": "II",
+  "stampPage": 1
+}
+
+
+6.4 PDF local (desarrollo / NetBeans)
+------------------------------
+"invocacion": {
+  "origenDocumento": "local",
+  "rutaLocal": "documento_prueba.pdf"
+},
+"param": {
+  "originPath": "documento_prueba.pdf",
+  "destinationPath": "D:/salida/documento[F].pdf"
+}
+
+
+6.5 Web sin Alfresco — PDF en Base64
+------------------------------
+"invocacion": {
+  "origenDocumento": "bytes",
+  "callbackUrl": "http://portal/api/firma/callback",
+  "token": "..."
+},
+"document": "<base64 del pdf>",
+"param": {
+  "fileName": "solicitud.pdf",
+  "signatureFormat": 1,
+  "signatureStyle": 1,
+  "applyImage": true
+}
+
+
+6.6 Web sin Alfresco — URL temporal de descarga
+------------------------------
+"invocacion": {
+  "origenDocumento": "url",
+  "documentoUrl": "https://portal/api/docs/temp/abc123",
+  "token": "..."
+}
+
+
+6.7 Firma rapida sin visor
+------------------------------
+"invocacion": {
+  "sinVisor": true,
+  "modo": "soloFirma",
+  "FirmaArrastrar": false
+},
+"param": {
+  "positionx": 10,
+  "positiony": 400
+}
+
+
+6.8 Firma invisible (sin sello grafico)
+------------------------------
+"param": {
+  "signatureStyle": 0,
+  "applyImage": false
+}
+
+
+7. CALLBACK DE RESPUESTA (si callbackUrl esta definido)
+--------------------------------------------------------------------------------
+
+Al terminar la firma, el desktop hace POST JSON a callbackUrl (ej. firma-digital-service
+POST /api/firma/callback). En SUCCESS incluye el documento firmado en signedContentBase64.
+El servicio guarda el archivo en firma.callback.storage-dir (default: callback-recibidos).
+
+Consulta posterior: GET /api/firma/callback/results/{idSolicitud}
+Devuelve signedContentBase64 (documento firmado), metadata y ya no expone rutas de disco.
+
+{
+  "status": "SUCCESS" | "ERROR",
+  "errorCode": null | "SIGN_ERROR",
+  "errorMessage": null | "texto",
+  "document": {
+    "originalHash": "sha256:...",
+    "signedHash": "sha256:...",
+    "fileName": "documento.pdf",
+    "fileSize": 204800,
+    "mimeType": "application/pdf",
+    "signedContentBase64": "JVBERi0x..."
+  },
+  "signer": {
+    "dni": "...",
+    "fullName": "...",
+    "email": "",
+    "organization": "..."
+  },
+  "transaction": {
+    "transactionId": "<idSolicitud>",
+    "sessionId": "<token>",
+    "ipAddress": "...",
+    "componentVersion": "2.4.0-STABLE",
+    "signedAt": "2026-03-13T10:45:00Z"
+  }
+}
+
+
+8. PENDIENTES (no disponibles aun en cliente desktop)
+--------------------------------------------------------------------------------
+
+- Origen Alfresco sin destinationPath: sube el firmado al mismo nodeId via POST /api/alfresco/documents/{id}/upload
+- Alfresco/callback con salida .xml o .p7s (PAdES en Alfresco si)
+- stampWordWrap
+- stampWordWrap (ajuste de texto del sello)
+- TSA en produccion (webTsa, userTsa, passwordTsa) — mapeados pero sin prueba institucional
+- sinBandeja, abrirVisorPrimero (bandeja de documentos pendientes)
+
+
+9. CONFIGURACION RELACIONADA (client.properties)
+--------------------------------------------------------------------------------
+
+parametria.enabled=true          Cargar parametria.json al arrancar
+parametria.path=parametria.json   Ruta del JSON
+signing.image.path=...             PNG sello si stamp vacio y applyImage=true
+signing.default.posx=10
+signing.default.posy=400
+signing.text.size=13
+signing.reason=Firma digital OSINERGMIN
+auth.api.baseUrl=...               API login si no hay token en parametria
+
+
+10. CASOS DE PRUEBA CON JSON
+--------------------------------------------------------------------------------
+
+Carpeta: parametria-casos/
+
+Cada archivo es un parametria.json completo listo para copiar a la raiz del
+proyecto (como parametria.json) o apuntar con:
+
+  parametria.path=parametria-casos/CP-01-alfresco-arrastre.json
+
+Matriz resumida (detalle en CASOS_PRUEBA_PARAMETRIA.csv):
+
+ID      Archivo                              Escenario principal
+------  -----------------------------------  ----------------------------------
+CP-01   CP-01-alfresco-arrastre.json         Alfresco + arrastre + callback
+CP-02   CP-02-alfresco-posicion-fija.json    Alfresco + posicion fija (sin arrastre)
+CP-03   CP-03-local-con-destino.json         Local + destinationPath
+CP-04   CP-04-local-preset-II.json           Local + positioningMode II
+CP-05   CP-05-sin-visor-solo-firma.json      sinVisor + soloFirma + Alfresco
+CP-06   CP-06-url-descarga.json              Origen URL + descarga HTTP
+CP-07   CP-07-bytes-base64.json              Origen bytes (rellenar document)
+CP-08   CP-08-firma-invisible.json           signatureStyle 0, applyImage false
+CP-09   CP-09-credential-alias.json          Preseleccion de certificado
+CP-10   CP-10-xades-error-esperado.json      Negativo: XAdES con PDF (debe fallar)
+CP-11   CP-11-solo-texto-estilo4.json        Solo texto + preset ID
+CP-12   CP-12-xades-xml-sin-visor.json       XAdES XML desde Alfresco (${NODE_ID_ALFRESCO_XML})
+CP-13   CP-13-cades-pdf-sin-visor.json       CAdES PDF Alfresco -> .p7s
+CP-14   CP-14-cades-archivo-generico.json    CAdES .docx Alfresco -> .p7s
+
+
+10.1 Como ejecutar un caso de prueba
+--------------------------------------------------------------------------------
+
+1. Sustituir placeholders en el JSON del caso:
+   - <JWT_TOKEN>           Token Keycloak valido
+   - <NODE_ID_ALFRESCO>    UUID del documento en Alfresco
+   - <REEMPLAZAR_CON_BASE64_DEL_PDF>   Solo en CP-07
+
+2. Copiar el archivo elegido a parametria.json
+   O bien editar client.properties:
+   parametria.path=parametria-casos/CP-01-alfresco-arrastre.json
+
+3. Verificar client.properties:
+   parametria.enabled=true
+   signing.image.path=<ruta PNG sello>   (si applyImage=true y stamp vacio)
+
+4. Ejecutar el firmador (NetBeans / mvn javafx:run).
+
+5. Validar:
+   - Flujo UI (visor, arrastre, sin visor segun caso)
+   - Log de firma (posicion param vs visor)
+   - PDF firmado descargable
+   - Callback HTTP si callbackUrl esta definido
+
+
+10.2 Placeholders comunes en los JSON de prueba
+--------------------------------------------------------------------------------
+
+Placeholder                          Reemplazar por
+-----------------------------------  ------------------------------------------
+<JWT_TOKEN>                          access_token Keycloak del firmante
+<NODE_ID_ALFRESCO>                   nodeId del PDF en Alfresco
+<REEMPLAZAR_CON_BASE64_DEL_PDF>      Base64 del PDF (caso CP-07)
+Cert2026_CAVig-AFVig (CP-09)         Alias real del certificado en el equipo
+
+
+10.3 Notas por caso
+--------------------------------------------------------------------------------
+
+CP-01  Caso de regresion principal (produccion tipica).
+CP-02  FirmaArrastrar=false: no debe aparecer fila de arrastre en visor.
+CP-03  Ajustar destinationPath a una carpeta writable en la maquina de prueba.
+CP-06  documentoUrl debe ser un endpoint real que devuelva application/pdf.
+CP-07  Sin Alfresco; util para portal que envia PDF en Base64.
+CP-10  Caso negativo: XAdES + PDF; mensaje «requiere XML», no firmar.
+CP-11  applyImage=false: no requiere PNG; prueba estilo solo texto.
+CP-12  Nodo Alfresco con XML; env FIRMA_NODE_ID_ALFRESCO_XML; salida .xml firmado local.
+CP-13  Mismo nodeId PDF que CP-01; salida .p7s local (PDF en Alfresco no se modifica).
+CP-14  Nodo Alfresco con .docx; env FIRMA_NODE_ID_ALFRESCO_DOCX; salida .p7s local.
+
+
+11. PANEL DE ADMINISTRACION (CLIENTE DESKTOP)
+--------------------------------------------------------------------------------
+
+Ubicacion: menu lateral «Administracion» (misma ventana principal, no otro Stage).
+Acceso: JWT del usuario debe incluir al menos un rol listado en client.properties:
+
+  admin.jwt.roles=view-clients,query-clients,query-users
+
+(Roles provisionales hasta definir OSIFIRMA_ADMIN en Keycloak.)
+
+Campos editables: URL TSL, verificar TSL, URL/usuario/clave TSA, nivel por defecto (B|T|LTA),
+nota de algoritmo (referencia; el motor certificado define el algoritmo real).
+
+Persistencia: ~/.osinergmin-firma/signing-admin.properties
+
+Prioridad al firmar y verificar:
+  1. parametria.json — param.signatureLevel, webTsa, userTsa, passwordTsa (si vienen en JSON)
+  2. Panel de administracion — TSL, verificar TSL, TSA y nivel cuando param no los define
+  3. client.properties — valores empaquetados (signing.tsl.url, etc.)
+
+Boton «Volver» restaura la pantalla desde la que se abrio (certificados, visor, firma o exito).
+
+
+================================================================================
+  Fin del documento
+================================================================================

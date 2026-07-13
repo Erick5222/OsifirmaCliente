@@ -1,0 +1,17 @@
+{
+  "invocacion": {
+    "idSolicitud": "CP-10-XADES-NEG",
+    "origenDocumento": "local",
+    "rutaLocal": "documento_prueba.pdf",
+    "sinVisor": true,
+    "modo": "soloFirma",
+    "FirmaArrastrar": false
+  },
+  "param": {
+    "signatureFormat": 2,
+    "fileName": "documento.xml",
+    "signatureStyle": 4,
+    "applyImage": false,
+    "signatureReason": "Prueba negativa XAdES — CP-10"
+  }
+}

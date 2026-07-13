@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.osinergmin.firma.desktop.ui.main.MainWorkspaceController"
+            prefWidth="1260" prefHeight="820" styleClass="workspace-outer">
+
+   <!-- Barra de ventana (Stage sin decoración del SO). -->
+   <top>
+      <HBox fx:id="windowChrome" id="windowTitleBar" styleClass="login-chrome workspace-window-chrome" alignment="CENTER_LEFT" spacing="12">
+         <padding>
+            <Insets right="8" />
+         </padding>
+         <HBox fx:id="dragChromeLeft" spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+            <ImageView fitHeight="20" fitWidth="20" preserveRatio="true" pickOnBounds="true" styleClass="login-chrome-logo">
+               <image>
+                  <Image url="@../../images/osinergmin-logo.png" />
+               </image>
+            </ImageView>
+            <Label text="Osinergmin Firma Digital" styleClass="login-chrome-title" />
+         </HBox>
+         <HBox spacing="2" alignment="CENTER_RIGHT" styleClass="login-window-controls">
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#onMinimize" text="-" styleClass="login-window-btn" prefWidth="42" />
+            <Button fx:id="maximizeButton" focusTraversable="false" mnemonicParsing="false" onAction="#onMaximize"
+                    text="□" styleClass="login-window-btn" prefWidth="42" />
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#onCloseWindow" text="X"
+                    styleClass="login-window-btn login-window-btn-close" prefWidth="42" />
+         </HBox>
+      </HBox>
+   </top>
+
+   <center>
+      <HBox styleClass="workspace-root" spacing="0" alignment="TOP_LEFT">
+         <VBox fx:id="mainSidebar" styleClass="main-sidebar" minWidth="258" prefWidth="270" maxWidth="280" spacing="0">
+            <padding>
+               <Insets top="20" right="18" bottom="18" left="18" />
+            </padding>
+            <VBox spacing="6" alignment="TOP_LEFT" styleClass="sidebar-brand-block">
+               <ImageView fitWidth="196" fitHeight="72" preserveRatio="true" pickOnBounds="true" styleClass="sidebar-brand-logo">
+                  <image>
+                     <Image url="@../../images/osinergmin-logo-principal.png" />
+                  </image>
+               </ImageView>
+               <Label styleClass="sidebar-brand-caption" text="Firma digital" />
+            </VBox>
+            <Label styleClass="sidebar-section" text="GESTIÓN DE FIRMAS">
+               <VBox.margin>
+                  <Insets top="24" />
+               </VBox.margin>
+            </Label>
+            <Label styleClass="sidebar-user" text="Usuario institucional" visible="false" managed="false" />
+            <VBox spacing="8">
+               <VBox.margin>
+                  <Insets top="16" />
+               </VBox.margin>
+               <StackPane fx:id="sidebarNavFirmar" maxWidth="Infinity" styleClass="nav-sidebar-row"
+                          onMouseClicked="#onSidebarNavFirmar">
+                  <HBox alignment="CENTER_LEFT" spacing="12">
+                     <padding>
+                        <Insets top="11" right="14" bottom="11" left="10" />
+                     </padding>
+                     <Label styleClass="nav-sidebar-icon" text="✎" minWidth="22" alignment="CENTER" />
+                     <Label styleClass="nav-sidebar-caption" text="Firmar documento" />
+                  </HBox>
+               </StackPane>
+               <!-- Historial: deshabilitado hasta implementar bandeja de operaciones
+               <StackPane fx:id="sidebarNavHistorial" maxWidth="Infinity" styleClass="nav-sidebar-row"
+                          onMouseClicked="#onSidebarNavHistorial">
+                  <HBox alignment="CENTER_LEFT" spacing="12">
+                     <padding>
+                        <Insets top="11" right="14" bottom="11" left="10" />
+                     </padding>
+                     <Label styleClass="nav-sidebar-icon" text="☰" minWidth="22" alignment="CENTER" />
+                     <Label styleClass="nav-sidebar-caption" text="Historial" />
+                  </HBox>
+               </StackPane>
+               -->
+               <StackPane fx:id="sidebarNavAdministracion" visible="false" managed="false" maxWidth="Infinity"
+                          styleClass="nav-sidebar-row" onMouseClicked="#onSidebarNavAdministracion">
+                  <HBox alignment="CENTER_LEFT" spacing="12">
+                     <padding>
+                        <Insets top="11" right="14" bottom="11" left="10" />
+                     </padding>
+                     <Label styleClass="nav-sidebar-icon" text="⚙" minWidth="22" alignment="CENTER" />
+                     <Label styleClass="nav-sidebar-caption" text="Administración" />
+                  </HBox>
+               </StackPane>
+            </VBox>
+            <Button mnemonicParsing="false" onAction="#onNuevoProceso" text="+ Nuevo proceso"
+                    styleClass="sidebar-primary-btn" maxWidth="Infinity" visible="false" managed="false">
+               <VBox.margin>
+                  <Insets top="20" />
+               </VBox.margin>
+            </Button>
+            <Region VBox.vgrow="ALWAYS" minHeight="12" />
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="nav-item nav-item-help" maxWidth="Infinity">
+               <Label styleClass="nav-icon" text="?" minWidth="20" alignment="CENTER" />
+               <Label styleClass="nav-caption" text="Ayuda" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="nav-item nav-item-help" maxWidth="Infinity"
+                  onMouseClicked="#onLogoutQuick">
+               <VBox.margin>
+                  <Insets top="6" />
+               </VBox.margin>
+               <Label styleClass="nav-icon" text="⇥" minWidth="20" alignment="CENTER" />
+               <Label styleClass="nav-caption" text="Cerrar sesión" />
+            </HBox>
+         </VBox>
+
+         <BorderPane fx:id="mainColumn" HBox.hgrow="ALWAYS" styleClass="main-column">
+            <top>
+               <HBox styleClass="workspace-topbar" alignment="CENTER_RIGHT" spacing="14"
+                     visible="false" managed="false">
+                  <padding>
+                     <Insets top="12" right="24" bottom="12" left="24" />
+                  </padding>
+                  <Region HBox.hgrow="ALWAYS" />
+                  <HBox styleClass="cert-pill" alignment="CENTER_LEFT" spacing="8" visible="false" managed="false">
+                     <Label text="🛡" styleClass="cert-pill-icon" />
+                     <Label text="Certificado activo" />
+                  </HBox>
+                  <Button focusTraversable="false" mnemonicParsing="false" onAction="#onLogoutQuick"
+                          styleClass="icon-circle-btn" text="⇥" prefWidth="36" prefHeight="36"
+                          visible="false" managed="false" />
+                  <Label styleClass="user-avatar" text="JD" minWidth="40" prefWidth="40" minHeight="40" prefHeight="40"
+                         alignment="CENTER" visible="false" managed="false" />
+               </HBox>
+            </top>
+            <center>
+               <StackPane styleClass="workspace-content-bg">
+                  <VBox fx:id="certificateSelectorCard" styleClass="cert-selector-card signing-modal-card" maxWidth="780"
+                        spacing="0" StackPane.alignment="CENTER">
+                     <HBox styleClass="signing-modal-header" alignment="CENTER_LEFT">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                           <padding>
+                              <Insets top="16" right="10" bottom="16" left="18" />
+                           </padding>
+                           <Label styleClass="signing-modal-title" text="Selector de certificados" />
+                           <Label styleClass="signing-modal-subdoc"
+                                  text="Elija el certificado digital para completar el proceso de firma institucional."
+                                  wrapText="true" />
+                        </VBox>
+                     </HBox>
+                     <VBox spacing="14" fillWidth="true">
+                        <padding>
+                           <Insets top="20" right="22" bottom="16" left="22" />
+                        </padding>
+                        <TableView fx:id="certificateTable" styleClass="cert-table-view" prefHeight="232" maxHeight="232" />
+                        <HBox spacing="16" alignment="TOP_LEFT">
+                           <VBox styleClass="cert-selector-info" spacing="8" HBox.hgrow="ALWAYS">
+                              <padding>
+                                 <Insets top="12" right="14" bottom="12" left="14" />
+                              </padding>
+                              <HBox spacing="10" alignment="TOP_LEFT">
+                                 <Label text="ⓘ" styleClass="cert-info-glyph" />
+                                 <Label styleClass="cert-info-text" wrapText="true"
+                                        text="El certificado seleccionado se usará para generar una firma electrónica con plena validez legal conforme a la normativa PKI institucional. El PIN del dispositivo criptográfico se solicitará durante el proceso de firma." />
+                              </HBox>
+                           </VBox>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                           <Button focusTraversable="false" mnemonicParsing="false"
+                                   onAction="#onCancelCertificateSelector" text="Cancelar"
+                                   styleClass="cert-modal-btn cert-modal-btn-secondary" />
+                           <Region HBox.hgrow="ALWAYS" />
+                           <Button focusTraversable="false" mnemonicParsing="false"
+                                   onAction="#onConfirmCertificateSelection" text="✓  Seleccionar certificado"
+                                   styleClass="cert-modal-btn cert-modal-btn-primary" />
+                        </HBox>
+                     </VBox>
+                  </VBox>
+
+                  <VBox fx:id="documentViewerCard" visible="false" managed="false" maxWidth="Infinity" maxHeight="Infinity"
+                        StackPane.alignment="CENTER">
+                     <fx:include fx:id="pdfViewer" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"
+                                 source="DocumentViewer.fxml" />
+                  </VBox>
+
+                  <VBox fx:id="signingCard" visible="false" managed="false" styleClass="signing-modal-card"
+                        maxWidth="680" spacing="0" StackPane.alignment="CENTER">
+                     <HBox styleClass="signing-modal-header" alignment="CENTER_LEFT">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                           <padding>
+                              <Insets top="16" right="10" bottom="16" left="18" />
+                           </padding>
+                           <Label fx:id="signingModalTitle" styleClass="signing-modal-title" text="Proceso de firma digital" />
+                           <Label fx:id="signingDocSubtitle" styleClass="signing-modal-subdoc"
+                                  text="Documento: documento_prueba.pdf" />
+                        </VBox>
+                        <HBox styleClass="signing-status-pill" alignment="CENTER" spacing="8">
+                           <HBox.margin>
+                              <Insets right="16" top="10" bottom="10" />
+                           </HBox.margin>
+                           <padding>
+                              <Insets top="6" right="14" bottom="6" left="14" />
+                           </padding>
+                           <Label fx:id="execSpinGlyph" styleClass="signing-spin-glyph" text="⟳" />
+                           <Label text="EN EJECUCIÓN" />
+                        </HBox>
+                     </HBox>
+
+                     <VBox spacing="14" fillWidth="true">
+                        <padding>
+                           <Insets top="22" right="24" bottom="20" left="24" />
+                        </padding>
+
+                        <HBox fx:id="signingStepper" alignment="CENTER_LEFT" styleClass="signing-stepper">
+                           <VBox styleClass="signing-step-column" spacing="10" prefWidth="128" alignment="TOP_CENTER">
+                              <StackPane styleClass="step-node step-node-done">
+                                 <Label text="&#x2713;" styleClass="step-node-inner step-check-glyph"
+                                        StackPane.alignment="CENTER" />
+                              </StackPane>
+                              <Label styleClass="step-label-title" text="Validando certificado" wrapText="true"
+                                     textAlignment="CENTER" />
+                              <Label styleClass="step-label-detail-done" text="Completado" />
+                           </VBox>
+                           <Region styleClass="step-connector step-connector-done" HBox.hgrow="ALWAYS"
+                                   maxHeight="3" prefHeight="2" />
+
+                           <VBox styleClass="signing-step-column" spacing="10" prefWidth="128" alignment="TOP_CENTER">
+                              <StackPane styleClass="step-node step-node-done">
+                                 <Label text="&#x2713;" styleClass="step-node-inner step-check-glyph"
+                                        StackPane.alignment="CENTER" />
+                              </StackPane>
+                              <Label styleClass="step-label-title" text="Consultando TSL" wrapText="true"
+                                     textAlignment="CENTER" />
+                              <Label styleClass="step-label-detail-done" text="Completado" />
+                           </VBox>
+                           <Region styleClass="step-connector step-connector-done" HBox.hgrow="ALWAYS"
+                                   maxHeight="3" prefHeight="2" />
+
+                           <VBox styleClass="signing-step-column" spacing="10" prefWidth="128" alignment="TOP_CENTER">
+                              <StackPane styleClass="step-node step-node-running">
+                                 <Label text="⏳" styleClass="step-node-running-icon" StackPane.alignment="CENTER" />
+                              </StackPane>
+                              <Label styleClass="step-label-title step-label-title-em" text="Aplicando sello"
+                                     wrapText="true" textAlignment="CENTER" />
+                              <Label styleClass="step-label-detail-active" text="En proceso…" />
+                           </VBox>
+                           <Region styleClass="step-connector step-connector-muted" HBox.hgrow="ALWAYS"
+                                   maxHeight="3" prefHeight="2" />
+
+                           <VBox styleClass="signing-step-column" spacing="10" prefWidth="128" alignment="TOP_CENTER">
+                              <StackPane styleClass="step-node step-node-pending">
+                                 <Label text="🔒" styleClass="step-node-inner-muted" StackPane.alignment="CENTER" />
+                              </StackPane>
+                              <Label styleClass="step-label-title-muted" text="Firmando" wrapText="true"
+                                     textAlignment="CENTER" />
+                              <Label styleClass="step-label-detail-pending" text="Pendiente" />
+                           </VBox>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT">
+                           <Label styleClass="signing-progress-caption" fx:id="progressCaptionLabel"
+                                  text="Progreso global: 65 %" />
+                           <Region HBox.hgrow="ALWAYS" />
+                           <Label styleClass="signing-progress-eta" fx:id="etaLabel"
+                                  text="Tiempo estimado: 4 s restantes" />
+                        </HBox>
+                        <ProgressBar fx:id="signingProgressBar" maxWidth="Infinity" prefHeight="10"
+                                     styleClass="signing-global-progress progress-bar" progress="0.65" />
+
+                        <VBox fx:id="signingConsoleSection" spacing="8">
+                           <HBox fx:id="signingConsoleHeader" alignment="CENTER_LEFT" spacing="8">
+                              <Label styleClass="signing-console-title-icon" text="◧" />
+                              <Label styleClass="signing-console-title" text="Eventos del sistema" />
+                           </HBox>
+                           <TextArea fx:id="signingLogArea" editable="false" wrapText="true" focusTraversable="false"
+                                     styleClass="signing-console" prefHeight="152" />
+                        </VBox>
+
+                        <HBox fx:id="signingFooter" spacing="14" alignment="CENTER_RIGHT">
+                           <Hyperlink onAction="#onCancelSigning" styleClass="signing-cancel-link"
+                                      text="Cancelar operación" />
+                        </HBox>
+                     </VBox>
+                  </VBox>
+
+                  <!-- Pantalla final: firma completada -->
+                  <VBox fx:id="signingSuccessCard" visible="false" managed="false" alignment="TOP_CENTER"
+                        spacing="20" StackPane.alignment="TOP_CENTER" maxWidth="760">
+                     <StackPane.margin>
+                        <Insets top="40" left="24" right="24" />
+                     </StackPane.margin>
+                     <VBox styleClass="signing-success-shell" maxWidth="760" spacing="0">
+                        <HBox alignment="CENTER_LEFT" spacing="0">
+                           <VBox styleClass="signing-success-left" minWidth="232" prefWidth="248" maxWidth="260"
+                                 alignment="TOP_CENTER" spacing="18">
+                              <padding>
+                                 <Insets top="36" right="20" bottom="36" left="20" />
+                              </padding>
+                              <StackPane styleClass="signing-success-icon-badge" maxWidth="72" maxHeight="72"
+                                         prefWidth="72" prefHeight="72">
+                                 <Label text="&#x2713;" styleClass="signing-success-check-glyph"
+                                        StackPane.alignment="CENTER" />
+                              </StackPane>
+                              <Label styleClass="signing-success-main-title" text="Firma realizada con éxito"
+                                     wrapText="true" textAlignment="CENTER" />
+                              <Label fx:id="successMainSubLabel" styleClass="signing-success-main-sub" wrapText="true" textAlignment="CENTER"
+                                     text="El documento ha sido procesado y certificado legalmente por la autoridad competente." />
+                           </VBox>
+                           <VBox styleClass="signing-success-right" spacing="14" HBox.hgrow="ALWAYS">
+                              <padding>
+                                 <Insets top="22" right="22" bottom="22" left="22" />
+                              </padding>
+                              <HBox alignment="TOP_LEFT" spacing="12">
+                                 <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="signing-success-detail-title" text="Detalles de la operación" />
+                                    <Label styleClass="signing-success-detail-sub"
+                                           text="Registro de trazabilidad criptográfica" />
+                                 </VBox>
+                                 <Label styleClass="signing-success-id-pill" text="ID: OS-99283-X" />
+                              </HBox>
+                              <VBox spacing="6">
+                                 <Label styleClass="success-trace-field-label" text="ESTADO DE VERIFICACIÓN" />
+                                 <Label fx:id="successVerificationStatusValue" styleClass="success-trace-field-value"
+                                        text="—" wrapText="true" />
+                              </VBox>
+                              <VBox spacing="6">
+                                 <Label styleClass="success-trace-field-label" text="INTEGRIDAD DEL DOCUMENTO" />
+                                 <Label fx:id="successIntegrityValue" styleClass="success-trace-field-value"
+                                        text="—" wrapText="true" />
+                              </VBox>
+                              <VBox spacing="6">
+                                 <Label styleClass="success-trace-field-label" text="RESUMEN DE FIRMAS" />
+                                 <Label fx:id="successSignaturesValue" styleClass="success-trace-field-value"
+                                        text="—" wrapText="true" />
+                              </VBox>
+                              <VBox spacing="6">
+                                 <Label styleClass="success-trace-field-label" text="FECHA DE VERIFICACIÓN" />
+                                 <Label fx:id="successVerificationDateValue" styleClass="success-trace-field-value"
+                                        text="—" />
+                              </VBox>
+                              <HBox spacing="10">
+                                 <Button focusTraversable="false" mnemonicParsing="false"
+                                         onAction="#onSuccessDownloadDocument" text="⬇ Descargar documento"
+                                         styleClass="button success-btn-download" />
+                                 <Button fx:id="successOpenDocumentButton" focusTraversable="false"
+                                         mnemonicParsing="false" onAction="#onSuccessOpenSigned"
+                                         text="Ver documento"
+                                         styleClass="button success-btn-open-secondary" />
+                              </HBox>
+                              <Hyperlink focusTraversable="false" styleClass="signing-success-tech-link"
+                                         text="⟨ ⟩ Ver detalle técnico" onAction="#onSuccessTechnicalDetail" />
+                           </VBox>
+                        </HBox>
+                     </VBox>
+                     <HBox alignment="CENTER">
+                        <Button focusTraversable="false" mnemonicParsing="false"
+                                onAction="#onSigningSuccessClose" text="Cerrar"
+                                prefWidth="200" styleClass="button signing-success-close-btn" />
+                     </HBox>
+                  </VBox>
+
+                  <!-- Panel administracion TSL / TSA -->
+                  <VBox fx:id="adminConfigCard" visible="false" managed="false" alignment="TOP_CENTER"
+                        spacing="16" StackPane.alignment="TOP_CENTER" maxWidth="760">
+                     <StackPane.margin>
+                        <Insets top="32" left="24" right="24" />
+                     </StackPane.margin>
+                     <VBox styleClass="signing-success-shell cert-selector-card" maxWidth="760" spacing="0">
+                        <HBox styleClass="signing-modal-header" alignment="CENTER_LEFT" spacing="12">
+                           <VBox spacing="4" HBox.hgrow="ALWAYS">
+                              <padding>
+                                 <Insets top="16" right="10" bottom="16" left="18" />
+                              </padding>
+                              <Label styleClass="signing-modal-title" text="Administración de firma" />
+                              <Label styleClass="signing-modal-subdoc" wrapText="true"
+                                     text="Configuración institucional de TSL, TSA y nivel de firma para este equipo." />
+                           </VBox>
+                           <Button focusTraversable="false" mnemonicParsing="false"
+                                   onAction="#onAdminBack" text="← Volver"
+                                   styleClass="button success-btn-open-secondary">
+                              <HBox.margin>
+                                 <Insets right="18" />
+                              </HBox.margin>
+                           </Button>
+                        </HBox>
+                        <VBox spacing="14">
+                           <padding>
+                              <Insets top="18" right="22" bottom="22" left="22" />
+                           </padding>
+                           <VBox spacing="6">
+                              <Label styleClass="success-trace-field-label" text="URL TSL" />
+                              <TextField fx:id="adminTslUrlField" promptText="https://iofe.indecopi.gob.pe/TSL/tsl-pe.xml" />
+                           </VBox>
+                           <CheckBox fx:id="adminVerifyTslCheck" text="Verificar certificados contra TSL" />
+                           <VBox spacing="6">
+                              <Label styleClass="success-trace-field-label" text="URL TSA (niveles T / LTA)" />
+                              <TextField fx:id="adminTsaUrlField" promptText="https://..." />
+                           </VBox>
+                           <HBox spacing="12">
+                              <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                 <Label styleClass="success-trace-field-label" text="Usuario TSA" />
+                                 <TextField fx:id="adminTsaUserField" />
+                              </VBox>
+                              <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                 <Label styleClass="success-trace-field-label" text="Clave TSA" />
+                                 <PasswordField fx:id="adminTsaPasswordField" />
+                              </VBox>
+                           </HBox>
+                           <VBox spacing="6">
+                              <Label styleClass="success-trace-field-label" text="Nivel de firma por defecto" />
+                              <ComboBox fx:id="adminSignatureLevelCombo" maxWidth="Infinity" />
+                           </VBox>
+                           <VBox spacing="6">
+                              <Label styleClass="success-trace-field-label" text="Algoritmo (referencia)" />
+                              <TextField fx:id="adminAlgorithmField"
+                                        promptText="Definido por motor certificado" />
+                           </VBox>
+                           <HBox spacing="12" alignment="CENTER_RIGHT">
+                              <Button focusTraversable="false" mnemonicParsing="false"
+                                      onAction="#onAdminRestoreDefaults" text="Restaurar defaults"
+                                      styleClass="button success-btn-open-secondary" />
+                              <Button focusTraversable="false" mnemonicParsing="false"
+                                      onAction="#onAdminSave" text="Guardar configuración"
+                                      styleClass="button success-btn-download" />
+                           </HBox>
+                        </VBox>
+                     </VBox>
+                  </VBox>
+               </StackPane>
+            </center>
+            <bottom>
+               <HBox styleClass="workspace-footer-bar" alignment="CENTER_LEFT" visible="false" managed="false">
+                  <padding>
+                     <Insets top="10" right="24" bottom="10" left="24" />
+                  </padding>
+                  <Label text="v2.4.0-build.88 | Trazabilidad de auditoría activa"
+                         styleClass="workspace-footer-muted" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Hyperlink text="Soporte técnico" styleClass="workspace-footer-link" onAction="#onFooterSupport" />
+                  <Label text=" | " styleClass="workspace-footer-sep" />
+                  <Hyperlink text="Políticas de seguridad" styleClass="workspace-footer-link" onAction="#onFooterPolicy" />
+               </HBox>
+            </bottom>
+         </BorderPane>
+      </HBox>
+   </center>
+</BorderPane>
